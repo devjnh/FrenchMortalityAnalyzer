@@ -2,7 +2,7 @@
 This program allows to generate statistics with the French death logs published by the INSEE
 ## How to use the executable
 You can download the already built executable with the following link:  
-[Download FrenchMortality.zip](https://www.finalanalytics.com/Downloads/FrenchMortality.zip)  
+[Download FrenchMortality.zip](https://github.com/devjnh/FrenchMortalityAnalyzer/releases/latest/download/FrenchMortality.zip)  
 Extract all files in the zip file in a new folder. You can then launch the batch file *FrenchMortality.bat* that will launch the executable with a few command line examples.
 The first execution will automatically:
 
