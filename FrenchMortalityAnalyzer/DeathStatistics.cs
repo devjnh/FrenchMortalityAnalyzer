@@ -22,7 +22,7 @@ namespace FrenchMortalityAnalyzer
         public DatabaseEngine DatabaseEngine { get; set; }
         public AgeStructure AgeStructure { get; set; }
 
-        public int ReferenceYear { get; set; } = 2022;
+        static public int ReferenceYear { get; set; } = 2022;
         public void BuildStatistics(GenderFilter genderFilter)
         {
             Console.WriteLine($"Building death statistics. Gender: {genderFilter}");

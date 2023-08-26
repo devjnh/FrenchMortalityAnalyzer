@@ -114,7 +114,7 @@ namespace FrenchMortalityAnalyzer.Views
             varianceCellstyle.Fill.BackgroundColor.SetColor(Color.Gray);
             varianceCellstyle.Font.Color.SetColor(Color.White);
             varianceCellstyle.Font.Bold = true;
-            workSheet.Cells[iRow, iStartColumn + 2].Value = MortalityEvolution.Variance;
+            workSheet.Cells[iRow, iStartColumn + 2].Value = MortalityEvolution.StandardDeviation;
             workSheet.Cells[iRow, iStartColumn + 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
             workSheet.Cells[iRow, iStartColumn + 2].Style.Numberformat.Format = "0.0";
         }

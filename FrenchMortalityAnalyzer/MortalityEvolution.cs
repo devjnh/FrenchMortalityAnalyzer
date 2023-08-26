@@ -197,7 +197,21 @@ ORDER BY {1}";
             return histogramResolution;
         }
         public DataTable ExcessHistogram { get; private set; }
-        public double Variance { get; private set; }
+        public double StandardDeviation { get; private set; }
+        public int Population
+        {
+            get
+            {
+                string sqlCommand = $"SELECT SUM(Population) FROM AgeStructure WHERE Year = {DeathStatistics.ReferenceYear}";
+                if (MinAge >= 0)
+                    sqlCommand += $" AND Age >= {MinAge}";
+                if (MaxAge >= 0)
+                    sqlCommand += $" AND Age < {MaxAge}";
+                return Convert.ToInt32(DatabaseEngine.GetValue(sqlCommand));
+            }
+        }
+        double DeathRate { get; set; }
+
         void BuildExcessHistogram()
         {
             var values = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(GetTimeGroupingField(TimeMode))) > MinYearRegression).Select(r => r.Field<double>("Excess")).ToArray();
@@ -217,10 +231,11 @@ ORDER BY {1}";
             ExcessHistogram.Columns.Add("Excess", typeof(double));
             ExcessHistogram.Columns.Add("Frequency", typeof(double));
             ExcessHistogram.Columns.Add("Normal", typeof(double));
-            var normalizedValues = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(GetTimeGroupingField(TimeMode))) > MinYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
-            double average = normalizedValues.Average();
-            Variance = Math.Sqrt(average);
-            double sum = normalizedValues.Sum();
+            double[] standardizedDeaths = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(GetTimeGroupingField(TimeMode))) > MinYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
+            double averageDeaths = standardizedDeaths.Average();
+            DeathRate = averageDeaths / Population;
+            StandardDeviation = Math.Sqrt(DeathRate * (1 - DeathRate)) * averageDeaths;
+            double sum = standardizedDeaths.Sum();
             for (int i = 0; i < frequencies.Length; i++)
             {
                 DataRow dataRow = ExcessHistogram.NewRow();
@@ -228,7 +243,7 @@ ORDER BY {1}";
                 dataRow["Excess"] = x;
                 dataRow["Frequency"] = frequencies[i];
 
-                double y = Math.Exp(-0.5 * Math.Pow(x / Variance, 2)) / (Math.Sqrt(2 * Math.PI) * Variance) * resolution * values.Count();
+                double y = Math.Exp(-0.5 * Math.Pow(x / StandardDeviation, 2)) / (Math.Sqrt(2 * Math.PI) * StandardDeviation) * resolution * values.Count();
                 dataRow["Normal"] = y;
                 ExcessHistogram.Rows.Add(dataRow);
             }
