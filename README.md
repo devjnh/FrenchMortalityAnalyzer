@@ -1,7 +1,7 @@
 # FrenchMortalityAnalyzer
 This program allows to generate statistics with the French death logs published by the INSEE
 ## How to use the executable
-You can download the already built executable with the following link:  
+You can download the already built executable for Windows with the following link:  
 [Download FrenchMortality.zip](https://github.com/devjnh/FrenchMortalityAnalyzer/releases/latest/download/FrenchMortality.zip)  
 Extract all files in the zip file in a new folder. You can then launch the batch file *FrenchMortality.bat* that will launch the executable with a few command line examples.
 The first execution will automatically:
@@ -15,12 +15,12 @@ The first execution will automatically:
 
 The first execution will take some time to download and insert all the data in the database and then build the death statistics. So, you need to be patient.
 
-Then at every execution, the program will generate a MS Excel spreadsheet named *FrenchMortality.xlsx* according to the options specified in the command line. The example batch file will generate the French mortality by year since 2001 for all ages and the mortality by semester since 2010 for the age from 12 to 40 and then the spreadsheet is displayed.
+Then at every execution, the program will generate an MS Excel spreadsheet named *FrenchMortality.xlsx* according to the options specified in the command line. The example batch file will generate the French mortality by year since 2001 for all ages and the mortality by semester since 2010 for the age from 5 years to 40 and then the spreadsheet is displayed.
 
 Here is what the example batch file looks like :
 
     .\Bin\FrenchMortalityAnalyzer.exe evolution
-    .\Bin\FrenchMortalityAnalyzer.exe evolution --MinAge 12 --MaxAge 40 --TimeMode Semester
+    .\Bin\FrenchMortalityAnalyzer.exe evolution --MinAge 5 --MaxAge 40 --TimeMode Semester
     .\Bin\FrenchMortalityAnalyzer.exe show
 
 You can run your own examples by changing various parameters. For more information on what you can specify as arguments launch:
@@ -30,6 +30,8 @@ You can run your own examples by changing various parameters. For more informati
 ## How to build the executable
 If you want to build the executable by yourself and review or change the code, you need to download the code from this repository and you need to download and install Visual Studio 2022. You can use the free [community edition](https://visualstudio.microsoft.com/vs/community/).  
 With Visual Studio open the solution *FrenchMortalityAnalyzer.sln* and build it.
-The executable should be generated in the *FrenchMortalityAnalyzer\bin\Debug\net72* subfolder.
+The executable for Windows should be generated in the *FrenchMortalityAnalyzer\bin\Debug\net72* subfolder.
 ## How to distribute the executable
-Copy the executable *FrenchMortalityAnalyzer.exe* along with all the dll files from the mentioned folder.
+For Windows computers copy the executable *FrenchMortalityAnalyzer.exe* along with all the dll files from the *FrenchMortalityAnalyzer\bin\Debug\net72* folder.  
+For Linux or MacOSX you can try the .NET 6 version of the executable generated in the folder *FrenchMortalityAnalyzer\bin\Release\net6.0*. But this was not tested yet.
+
