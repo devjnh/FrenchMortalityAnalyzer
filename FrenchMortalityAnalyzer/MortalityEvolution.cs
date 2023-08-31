@@ -234,7 +234,7 @@ ORDER BY {1}";
             double[] standardizedDeaths = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(GetTimeGroupingField(TimeMode))) > MinYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
             double averageDeaths = standardizedDeaths.Average();
             DeathRate = averageDeaths / Population;
-            StandardDeviation = Math.Sqrt(DeathRate * (1 - DeathRate)) * averageDeaths;
+            StandardDeviation = Math.Sqrt(DeathRate * (1 - DeathRate) * Population);
             double sum = standardizedDeaths.Sum();
             for (int i = 0; i < frequencies.Length; i++)
             {
