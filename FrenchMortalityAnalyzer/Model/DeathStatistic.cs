@@ -13,6 +13,7 @@ namespace FrenchMortalityAnalyzer
         public int Year { get { return Date.Year; } }
         public double DeltaYear { get { return Date.Year + (Date.Month > 6 ? 0.5 : -0.5); } }
         public double Semester { get { return Date.Year + (Date.Month > 6 ? 0.5 : 0.0); } }
+        public double Quarter { get { return Date.Year + ((Date.Month - 1) / 3) * 0.25; } }
         public int DayOfyear { get { return Date.DayOfYear; } }
         public int Age { get; set; }
         public int Deaths { get; set; }
@@ -26,6 +27,7 @@ namespace FrenchMortalityAnalyzer
             dataRow[nameof(Year)] = Year;
             dataRow[nameof(DeltaYear)] = DeltaYear;
             dataRow[nameof(Semester)] = Semester;
+            dataRow[nameof(Quarter)] = Quarter;
             dataRow[nameof(DayOfyear)] = DayOfyear;
             dataRow[nameof(Age)] = Age;
             dataRow[nameof(Deaths)] = Deaths;
@@ -41,6 +43,7 @@ namespace FrenchMortalityAnalyzer
             dataTable.Columns.Add(nameof(Year), typeof(int));
             dataTable.Columns.Add(nameof(DeltaYear), typeof(double));
             dataTable.Columns.Add(nameof(Semester), typeof(double));
+            dataTable.Columns.Add(nameof(Quarter), typeof(double));
             dataTable.Columns.Add(nameof(DayOfyear), typeof(int));
             dataTable.Columns.Add(nameof(Age), typeof(int));
             dataTable.Columns.Add(nameof(Deaths), typeof(int));

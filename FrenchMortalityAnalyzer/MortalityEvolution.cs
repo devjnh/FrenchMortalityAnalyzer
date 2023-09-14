@@ -49,6 +49,8 @@ namespace FrenchMortalityAnalyzer
                 AddCondition($"Age < {MaxAge}", conditionBuilder);
             if (TimeMode == TimeMode.Semester)
                 AddCondition($"Year > {MinYearRegression-2}", conditionBuilder);
+            else if (TimeMode == TimeMode.Quarter)
+                AddCondition($"Year > {MinYearRegression}", conditionBuilder);
             string tablePostfix = string.Empty;
             if (GenderMode != GenderFilter.All)
                 tablePostfix = $"_{GenderMode}";
@@ -70,13 +72,39 @@ namespace FrenchMortalityAnalyzer
 
 
 
-        public double StandardizedPeriodLength => 365 * (TimeMode == TimeMode.Semester ?  0.5 : 1.0);
+        public double StandardizedPeriodLength => 365 * PeriodInFractionOfYear;
+
+        private double PeriodInFractionOfYear
+        {
+            get
+            {
+                return TimeMode switch
+                {
+                    TimeMode.Semester => 0.5,
+                    TimeMode.Quarter => 0.25,
+                    _ => 1.0,
+                };
+            }
+        }
+
+        private int PeriodInMonths
+        {
+            get
+            {
+                return TimeMode switch
+                {
+                    TimeMode.Semester => 6,
+                    TimeMode.Quarter => 3,
+                    _ => 12
+                };
+            }
+        }
         private double GetPeriodLength(double period)
         {
             int year = (int)period;
             int month = TimeMode == TimeMode.DeltaYear ? 7 : (int)((period - year) * 12) + 1;
             DateTime periodStart = new DateTime(year, month, 1);
-            DateTime periodEnd = periodStart.AddMonths(TimeMode == TimeMode.Semester ? 6 : 12);
+            DateTime periodEnd = periodStart.AddMonths(PeriodInMonths);
             double days = (periodEnd - periodStart).TotalDays;
             return days;
         }
@@ -97,6 +125,7 @@ ORDER BY {1}";
             {
                 case TimeMode.DeltaYear: return nameof(DeathStatistic.DeltaYear);
                 case TimeMode.Semester: return nameof(DeathStatistic.Semester);
+                case TimeMode.Quarter: return nameof(DeathStatistic.Quarter);
                 default: return nameof(DeathStatistic.Year);
             }
         }

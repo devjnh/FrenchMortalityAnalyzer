@@ -62,5 +62,5 @@ namespace FrenchMortalityAnalyzer
 
         public bool IsBuilt => DatabaseEngine.DoesTableExist(DeathStatistic.StatisticsTableName);
     }
-    public enum TimeMode { Year, DeltaYear, Semester, YearToDate}
+    public enum TimeMode { Year, DeltaYear, Semester, Quarter, YearToDate}
 }
