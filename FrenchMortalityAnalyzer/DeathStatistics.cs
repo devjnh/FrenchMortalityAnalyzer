@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml;
+﻿using MortalityAnalyzer.Model;
+using OfficeOpenXml;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
 using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Drawing.Chart.ChartEx;
@@ -35,7 +36,7 @@ namespace FrenchMortalityAnalyzer
                 int year = -1;
                 while (reader.Read())
                 {
-                    DeathStatistic deathStatistic = new DeathStatistic();
+                    DeathStatistic deathStatistic = new DeathStatistic { Country = "FR", AgeSpan = 1, DaySpan = 1};
                     deathStatistic.Date = (DateTime)reader[0];
                     deathStatistic.Age = (int)reader[1];
                     deathStatistic.Deaths = Convert.ToInt32(reader[2]);

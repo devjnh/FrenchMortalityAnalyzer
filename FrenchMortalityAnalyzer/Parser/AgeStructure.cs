@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml;
+﻿using MortalityAnalyzer.Model;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -123,6 +124,4 @@ namespace FrenchMortalityAnalyzer
             return population;
         }
     }
-
-    public enum GenderFilter { All = 0, Male = 1, Female = 2 }
 }
