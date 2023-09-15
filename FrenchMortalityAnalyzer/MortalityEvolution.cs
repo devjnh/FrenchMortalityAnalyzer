@@ -4,6 +4,7 @@ using MortalityAnalyzer.Model;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -47,16 +48,7 @@ namespace FrenchMortalityAnalyzer
             string toDate = WholePeriods ? "" : " to date";
             Console.WriteLine($"Generating mortality evolution");
             StringBuilder conditionBuilder = new StringBuilder();
-            if (!WholePeriods)
-                AddCondition($"DayOfYear <= {LastDay.DayOfYear}", conditionBuilder);
-            if (MinAge > 0)
-                AddCondition($"Age >= {MinAge}", conditionBuilder);
-            if (MaxAge > 0)
-                AddCondition($"Age < {MaxAge}", conditionBuilder);
-            if (TimeMode == TimeMode.Semester)
-                AddCondition($"Year > {MinYearRegression-2}", conditionBuilder);
-            else if (TimeMode == TimeMode.Quarter)
-                AddCondition($"Year > {MinYearRegression}", conditionBuilder);
+            AddConditions(conditionBuilder);
             string tablePostfix = string.Empty;
             if (GenderMode != GenderFilter.All)
                 tablePostfix = $"_{GenderMode}";
@@ -74,9 +66,22 @@ namespace FrenchMortalityAnalyzer
                 }
             BuildLinearRegression(DataTable, MinYearRegression, MaxYearRegression);
             BuildExcessHistogram();
+            BuildVaccinationStatistics();
         }
 
-
+        private void AddConditions(StringBuilder conditionBuilder)
+        {
+            if (!WholePeriods)
+                AddCondition($"DayOfYear <= {LastDay.DayOfYear}", conditionBuilder);
+            if (MinAge > 0)
+                AddCondition($"Age >= {MinAge}", conditionBuilder);
+            if (MaxAge > 0)
+                AddCondition($"Age < {MaxAge}", conditionBuilder);
+            if (TimeMode == TimeMode.Semester)
+                AddCondition($"Year > {MinYearRegression - 1}", conditionBuilder);
+            else if (TimeMode == TimeMode.Quarter)
+                AddCondition($"Year > {MinYearRegression}", conditionBuilder);
+        }
 
         public double StandardizedPeriodLength => 365 * PeriodInFractionOfYear;
 
@@ -281,6 +286,29 @@ ORDER BY {1}";
                 double y = Math.Exp(-0.5 * Math.Pow(x / StandardDeviation, 2)) / (Math.Sqrt(2 * Math.PI) * StandardDeviation) * resolution * values.Count();
                 dataRow["Normal"] = y;
                 ExcessHistogram.Rows.Add(dataRow);
+            }
+        }
+        private const string Query_Vaccination = @"SELECT {1}, SUM(FirstDose+SecondDose+ThirdDose) AS Injections FROM VaxStatistics{0}
+GROUP BY {1}
+ORDER BY {1}";
+        void BuildVaccinationStatistics()
+        {
+            StringBuilder conditionBuilder = new StringBuilder();
+            AddConditions(conditionBuilder);
+            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", GetTimeGroupingField(TimeMode));
+            DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
+            vaccinationStatistics.PrimaryKey = new DataColumn[] { vaccinationStatistics.Columns[0] };
+            DataTable.PrimaryKey = new DataColumn[] { DataTable.Columns[0] };
+            DataColumn injectionsColumn = DataTable.Columns.Add("Injections", typeof(int));
+            foreach (DataRow dataRow in DataTable.Rows)
+                dataRow[injectionsColumn] = 0;
+            if (WholePeriods)
+                vaccinationStatistics.Rows.Remove(vaccinationStatistics.Rows[vaccinationStatistics.Rows.Count - 1]);
+            foreach (DataRow dataRow in vaccinationStatistics.Rows)
+            {
+                string filter = $"{GetTimeGroupingField(TimeMode)}={((double)dataRow[0]).ToString(CultureInfo.InvariantCulture)}";
+                DataRow[] rows = DataTable.Select(filter);
+                rows[0][injectionsColumn] = dataRow[1];
             }
         }
     }
