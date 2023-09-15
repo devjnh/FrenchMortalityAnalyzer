@@ -31,6 +31,10 @@ namespace FrenchMortalityAnalyzer
         internal DatabaseEngine DatabaseEngine { get; set; }
         public DataTable DataTable { get; private set; }
         public bool WholePeriods => TimeMode != TimeMode.YearToDate;
+        public string Country => "France";
+        public string GetCountryDisplayName() => Country;
+        public string GetCountryInternalName() => Country;
+
         public void Generate()
         {
             if (WholePeriods)

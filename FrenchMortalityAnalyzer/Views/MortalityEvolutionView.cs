@@ -14,7 +14,10 @@ namespace FrenchMortalityAnalyzer.Views
 {
     internal class MortalityEvolutionView
     {
-
+        static MortalityEvolutionView()
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+        }
         internal MortalityEvolution MortalityEvolution { get; set; }
 
         public void Save(ExcelPackage package)
@@ -22,11 +25,14 @@ namespace FrenchMortalityAnalyzer.Views
             ExcelWorksheet workSheet = CreateSheet(package);
             BuildHeader(workSheet);
             BuildEvolutionTable(workSheet);
+            int iLastEvolutionRow = workSheet.Dimension.End.Row;
             BuildEvolutionChart(workSheet);
             BuildExcessHistogram(workSheet);
+            BuildExcessEvolutionChart(workSheet, iLastEvolutionRow);
+            BuildExcessPercentEvolutionChart(workSheet, iLastEvolutionRow);
         }
 
-        private string BaseName => $"{MortalityEvolution.TimeMode}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{WholePeriods}";
+        private string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeMode}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{WholePeriods}";
 
         private ExcelWorksheet CreateSheet(ExcelPackage package)
         {
@@ -48,7 +54,6 @@ namespace FrenchMortalityAnalyzer.Views
                 _ => "",
             };
         }
-
         private void BuildEvolutionTable(ExcelWorksheet workSheet)
         {
             workSheet.Cells[3, 1].LoadFromDataTable(MortalityEvolution.DataTable, true);
@@ -90,11 +95,27 @@ namespace FrenchMortalityAnalyzer.Views
             evolutionChart.SetPosition(2, 0, 7, 0);
             evolutionChart.SetSize(900, 500);
         }
+        private void BuildExcessEvolutionChart(ExcelWorksheet workSheet, int iLastRow)
+        {
+            ExcelChart evolutionChart = workSheet.Drawings.AddChart("ExcessEvolutionChart", eChartType.ColumnClustered);
+            var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[3, 5, iLastRow, 5], workSheet.Cells[3, 1, iLastRow, 1]);
+            standardizedDeathsSerie.Header = "Excess deaths";
+            evolutionChart.SetPosition(workSheet.Dimension.End.Row + 10, 0, 7, 0);
+            evolutionChart.SetSize(900, 500);
+        }
+        private void BuildExcessPercentEvolutionChart(ExcelWorksheet workSheet, int iLastRow)
+        {
+            ExcelChart evolutionChart = workSheet.Drawings.AddChart("ExcessPercentEvolutionChart", eChartType.ColumnClustered);
+            var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[3, 6, iLastRow, 6], workSheet.Cells[3, 1, iLastRow, 1]);
+            standardizedDeathsSerie.Header = "Excess deaths (%)";
+            evolutionChart.SetPosition(workSheet.Dimension.End.Row + 40, 0, 7, 0);
+            evolutionChart.SetSize(900, 500);
+        }
 
         private void BuildHeader(ExcelWorksheet workSheet)
         {
             workSheet.Row(1).Style.Font.Bold = true;
-            workSheet.Cells[1, 1].Value = $"French mortality evolution by {TimeModeText}";
+            workSheet.Cells[1, 1].Value = $"{MortalityEvolution.Country} mortality evolution by {TimeModeText}";
             workSheet.Cells[1, 5].Value = Period;
             workSheet.Cells[1, 7].Value = GenderModeText;
             workSheet.Cells[1, 9].Value = AgeRange;
@@ -103,6 +124,8 @@ namespace FrenchMortalityAnalyzer.Views
         private void BuildExcessHistogram(ExcelWorksheet workSheet)
         {
             int iStartRow = workSheet.Dimension.End.Row + 4;
+            if (iStartRow < 30)
+                iStartRow = 30;
             workSheet.Cells[iStartRow, 1].LoadFromDataTable(MortalityEvolution.ExcessHistogram, true);
             workSheet.Cells[iStartRow, 3, workSheet.Dimension.End.Row, 3].Style.Numberformat.Format = "0.0";
             ExcelRange rangeExcess = workSheet.Cells[iStartRow, 1, workSheet.Dimension.End.Row, 3];
@@ -132,7 +155,7 @@ namespace FrenchMortalityAnalyzer.Views
 
         private string GetSheetName()
         {
-            return $"By {TimeModeText}{AgeRange}{GenderModeText}";
+            return $"{MortalityEvolution.GetCountryDisplayName()} By {TimeModeText}{AgeRange}{GenderModeText}";
         }
 
         private string AgeRange
