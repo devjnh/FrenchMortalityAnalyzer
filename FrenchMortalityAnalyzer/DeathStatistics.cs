@@ -1,4 +1,5 @@
-﻿using MortalityAnalyzer.Model;
+﻿using MortalityAnalyzer;
+using MortalityAnalyzer.Model;
 using OfficeOpenXml;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
 using OfficeOpenXml.Drawing.Chart;

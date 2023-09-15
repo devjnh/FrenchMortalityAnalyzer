@@ -1,4 +1,5 @@
-﻿using MortalityAnalyzer.Model;
+﻿using MortalityAnalyzer;
+using MortalityAnalyzer.Model;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;

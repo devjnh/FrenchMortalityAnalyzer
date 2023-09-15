@@ -9,6 +9,8 @@ using FrenchMortalityAnalyzer.Views;
 using OfficeOpenXml;
 using CommandLine;
 using System.Diagnostics;
+using MortalityAnalyzer;
+using FrenchMortalityAnalyzer.Parser;
 
 class Program
 {
@@ -63,6 +65,10 @@ class Program
     }
     private static void Init(string dataFolder, DatabaseEngine databaseEngine)
     {
+        FrenchCovidVaxData owidCovidVaxData = new FrenchCovidVaxData { DatabaseEngine = databaseEngine };
+        if (!owidCovidVaxData.IsBuilt)
+            owidCovidVaxData.Extract(dataFolder);
+
         DeathLogs deathLogs = new DeathLogs { DatabaseEngine = databaseEngine };
         deathLogs.Extract(dataFolder);
 

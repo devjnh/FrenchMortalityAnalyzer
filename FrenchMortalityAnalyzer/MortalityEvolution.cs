@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using MortalityAnalyzer;
 using MortalityAnalyzer.Model;
 using System;
 using System.Collections.Generic;
