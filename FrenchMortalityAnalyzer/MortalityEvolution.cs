@@ -141,13 +141,13 @@ ORDER BY {1}";
                 default: return nameof(DeathStatistic.Year);
             }
         }
-        private void BuildLinearRegression(DataTable dataTable, int minYearRegression, int maxYearRegression)
+        private static void BuildLinearRegression(DataTable dataTable, int minYearRegression, int maxYearRegression)
         {
             List<double> xVals = new List<double>();
             List<double> yVals = new List<double>();
             foreach (DataRow dataRow in dataTable.Rows)
             {
-                double year = Convert.ToDouble(dataRow[0]);
+                double year = dataRow[0] is DateTime ? ((DateTime)dataRow[0]).ToOADate() : Convert.ToDouble(dataRow[0]);
                 if (year < minYearRegression || year >= maxYearRegression)
                     continue;
                 xVals.Add(year);
@@ -160,7 +160,7 @@ ORDER BY {1}";
             dataTable.Columns.Add("RelativeExcess", typeof(double));
             foreach (DataRow dataRow in dataTable.Rows)
             {
-                double year = Convert.ToDouble(dataRow[0]);
+                double year = dataRow[0] is DateTime ? ((DateTime)dataRow[0]).ToOADate() : Convert.ToDouble(dataRow[0]);
                 double baseLine = yintercept + slope * year;
                 dataRow["BaseLine"] = baseLine;
                 double excess = Convert.ToDouble(dataRow[1]) - baseLine;
@@ -253,6 +253,8 @@ ORDER BY {1}";
         }
         double DeathRate { get; set; }
 
+        public DataTable SlidingWeeks { get; private set; }
+
         void BuildExcessHistogram()
         {
             var values = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(GetTimeGroupingField(TimeMode))) > MinYearRegression).Select(r => r.Field<double>("Excess")).ToArray();
@@ -289,7 +291,7 @@ ORDER BY {1}";
                 ExcessHistogram.Rows.Add(dataRow);
             }
         }
-        private const string Query_Vaccination = @"SELECT {1}, SUM(FirstDose+SecondDose+ThirdDose) AS Injections FROM VaxStatistics{0}
+        private const string Query_Vaccination = @"SELECT {1}, SUM(SecondDose) AS Injections FROM VaxStatistics{0}
 GROUP BY {1}
 ORDER BY {1}";
         void BuildVaccinationStatistics()
@@ -336,6 +338,32 @@ ORDER BY {1}";
                 string filter = $"Week=#{Convert.ToDateTime(dataRow[0]).ToString(CultureInfo.InvariantCulture)}#";
                 DataRow[] rows = deathStatistics.Select(filter);
                 rows[0][injectionsColumn] = dataRow[1];
+            }
+
+            SlidingWeeks = new DataTable();
+            SlidingWeeks.Columns.Add("Week", typeof(DateTime));
+            SlidingWeeks.Columns.Add("Deaths", typeof(double));
+            SlidingWeeks.Columns.Add("Injections", typeof(int));
+            Queue<DataRow> queue = new Queue<DataRow>();
+            double deaths = 0;
+            int injections = 0;
+            foreach (DataRow dataRow in deathStatistics.Rows)
+            {
+                deaths += (double)dataRow[1];
+                injections += (int)dataRow[3];
+                queue.Enqueue(dataRow);
+                if (queue.Count < 12)
+                    continue;
+                DataRow firstWeek = queue.Dequeue();
+                SlidingWeeks.Rows.Add(new object[] { dataRow[0], deaths, injections });
+                deaths -= (double)firstWeek[1];
+                injections -= (int)firstWeek[3];
+
+            }
+            BuildLinearRegression(SlidingWeeks, (int)new DateTime(MinYearRegression, 1, 1).ToOADate(), (int)new DateTime(MaxYearRegression, 1, 1).ToOADate());
+            for (int i = 0; i < 300; i++)
+            {
+                SlidingWeeks.Rows.RemoveAt(0);
             }
         }
     }

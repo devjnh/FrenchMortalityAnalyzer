@@ -21,16 +21,19 @@ namespace FrenchMortalityAnalyzer.Views
         }
         internal MortalityEvolution MortalityEvolution { get; set; }
 
+        int _iLastEvolutionRow;
         public void Save(ExcelPackage package)
         {
             ExcelWorksheet workSheet = CreateSheet(package);
             BuildHeader(workSheet);
             BuildEvolutionTable(workSheet);
-            int iLastEvolutionRow = workSheet.Dimension.End.Row;
+            _iLastEvolutionRow = workSheet.Dimension.End.Row;
             BuildEvolutionChart(workSheet);
             BuildExcessHistogram(workSheet);
-            BuildExcessEvolutionChart(workSheet, iLastEvolutionRow);
-            BuildExcessPercentEvolutionChart(workSheet, iLastEvolutionRow);
+            BuildExcessEvolutionChart(workSheet, _iLastEvolutionRow);
+            BuildExcessPercentEvolutionChart(workSheet, _iLastEvolutionRow);
+            BuildWeeklyEvolutionTable(workSheet);
+            BuildWeeklyEvolutionChart(workSheet, workSheet.Dimension.End.Row);
         }
 
         private string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeMode}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{WholePeriods}";
@@ -80,6 +83,27 @@ namespace FrenchMortalityAnalyzer.Views
             workSheet.Cells[3, 6].Value = "Excess %";
             workSheet.Cells[3, 6, workSheet.Dimension.End.Row, 6].Style.Numberformat.Format = "0.0%";
         }
+        int _iStartWeekly;
+        private void BuildWeeklyEvolutionTable(ExcelWorksheet workSheet)
+        {
+            _iStartWeekly = workSheet.Dimension.End.Row + 3;
+            workSheet.Cells[_iStartWeekly, 1].LoadFromDataTable(MortalityEvolution.SlidingWeeks, true);
+            workSheet.Cells[_iStartWeekly, 1].Value = "Week";
+            workSheet.Column(2).AutoFit();
+            //create a range for the table
+            ExcelRange range = workSheet.Cells[_iStartWeekly, 1, workSheet.Dimension.End.Row, 6];
+
+            //add a table to the range
+            ExcelTable tab = workSheet.Tables.Add(range, $"WeeklyTable{BaseName}");
+            //format the table
+            tab.TableStyle = TableStyles.Light9;
+
+            workSheet.Cells[_iStartWeekly, 2, workSheet.Dimension.End.Row, 2].Style.Numberformat.Format = "0.0";
+            workSheet.Cells[_iStartWeekly, 4, workSheet.Dimension.End.Row, 5].Style.Numberformat.Format = "0.0";
+            workSheet.Cells[_iStartWeekly, 1, workSheet.Dimension.End.Row, 2].Style.Numberformat.Format = DateTimeFormatInfo.CurrentInfo.ShortDatePattern;
+            workSheet.Cells[_iStartWeekly, 6].Value = "Excess %";
+            workSheet.Cells[_iStartWeekly, 6, workSheet.Dimension.End.Row, 6].Style.Numberformat.Format = "0.0%";
+        }
 
         private void BuildEvolutionChart(ExcelWorksheet workSheet)
         {
@@ -106,6 +130,18 @@ namespace FrenchMortalityAnalyzer.Views
             vaccinationSerie.Header = "Injections";
             evolutionChart.UseSecondaryAxis = true;
             evolutionChart.SetPosition(workSheet.Dimension.End.Row + 10, 0, 7, 0);
+            evolutionChart.SetSize(900, 500);
+        }
+        private void BuildWeeklyEvolutionChart(ExcelWorksheet workSheet, int iLastRow)
+        {
+            ExcelChart evolutionChart = workSheet.Drawings.AddChart("WeeklyExcessEvolutionChart", eChartType.Line);
+            var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[_iStartWeekly, 5, iLastRow, 5], workSheet.Cells[_iStartWeekly, 1, iLastRow, 1]);
+            standardizedDeathsSerie.Header = "Excess deaths";
+            var vaxChart = evolutionChart.PlotArea.ChartTypes.Add(eChartType.Line);
+            var vaccinationSerie = vaxChart.Series.Add(workSheet.Cells[_iStartWeekly, 3, workSheet.Dimension.End.Row, 3], workSheet.Cells[_iStartWeekly, 1, workSheet.Dimension.End.Row, 1]);
+            vaccinationSerie.Header = "Injections";
+            evolutionChart.UseSecondaryAxis = true;
+            evolutionChart.SetPosition(_iLastEvolutionRow + 100, 0, 7, 0);
             evolutionChart.SetSize(900, 500);
         }
         private void BuildExcessPercentEvolutionChart(ExcelWorksheet workSheet, int iLastRow)
