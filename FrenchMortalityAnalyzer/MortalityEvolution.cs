@@ -67,6 +67,7 @@ namespace FrenchMortalityAnalyzer
             BuildLinearRegression(DataTable, MinYearRegression, MaxYearRegression);
             BuildExcessHistogram();
             BuildVaccinationStatistics();
+            BuildWeeklyVaccinationStatistics();
         }
 
         private void AddConditions(StringBuilder conditionBuilder)
@@ -308,6 +309,32 @@ ORDER BY {1}";
             {
                 string filter = $"{GetTimeGroupingField(TimeMode)}={Convert.ToDouble(dataRow[0]).ToString(CultureInfo.InvariantCulture)}";
                 DataRow[] rows = DataTable.Select(filter);
+                rows[0][injectionsColumn] = dataRow[1];
+            }
+        }
+        void BuildWeeklyVaccinationStatistics()
+        {
+            StringBuilder conditionBuilder = new StringBuilder();
+            AddConditions(conditionBuilder);
+            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", "Week");
+            DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
+            query = string.Format(Query_Years, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", "Week", "");
+            DataTable deathStatistics = DatabaseEngine.GetDataTable(query);
+
+            vaccinationStatistics.PrimaryKey = new DataColumn[] { vaccinationStatistics.Columns[0] };
+            deathStatistics.PrimaryKey = new DataColumn[] { deathStatistics.Columns[0] };
+            DataColumn injectionsColumn = deathStatistics.Columns.Add("Injections", typeof(int));
+            foreach (DataRow dataRow in deathStatistics.Rows)
+                dataRow[injectionsColumn] = 0;
+            if (WholePeriods)
+            {
+                vaccinationStatistics.Rows.Remove(vaccinationStatistics.Rows[vaccinationStatistics.Rows.Count - 1]);
+                deathStatistics.Rows.Remove(deathStatistics.Rows[deathStatistics.Rows.Count - 1]);
+            }
+            foreach (DataRow dataRow in vaccinationStatistics.Rows)
+            {
+                string filter = $"Week=#{Convert.ToDateTime(dataRow[0]).ToString(CultureInfo.InvariantCulture)}#";
+                DataRow[] rows = deathStatistics.Select(filter);
                 rows[0][injectionsColumn] = dataRow[1];
             }
         }
