@@ -55,6 +55,7 @@ namespace FrenchMortalityAnalyzer.Views
             ExcelWorksheet workSheet = CreateSheet(package);
             BuildWeeklyEvolutionTable(workSheet);
             BuildWeeklyEvolutionChart(workSheet, workSheet.Dimension.End.Row);
+            BuildWeeklyEvolutionChart(workSheet, workSheet.Dimension.End.Row, 300, 30);
         }
 
         int _iStartWeekly;
@@ -78,16 +79,17 @@ namespace FrenchMortalityAnalyzer.Views
             workSheet.Cells[_iStartWeekly, 6].Value = "Excess %";
             workSheet.Cells[_iStartWeekly, 6, workSheet.Dimension.End.Row, 6].Style.Numberformat.Format = "0.0%";
         }
-        private void BuildWeeklyEvolutionChart(ExcelWorksheet workSheet, int iLastRow)
+        private void BuildWeeklyEvolutionChart(ExcelWorksheet workSheet, int iLastRow, int offset = 0, int startChartRow = 0)
         {
-            ExcelChart evolutionChart = workSheet.Drawings.AddChart("WeeklyExcessEvolutionChart", eChartType.Line);
-            var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[_iStartWeekly, 5, iLastRow, 5], workSheet.Cells[_iStartWeekly, 1, iLastRow, 1]);
+            ExcelChart evolutionChart = workSheet.Drawings.AddChart($"WeeklyExcessEvolutionChart{offset}", eChartType.XYScatterLinesNoMarkers);
+            var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[_iStartWeekly+1+offset, 5, iLastRow, 5], workSheet.Cells[_iStartWeekly+1+offset, 1, iLastRow, 1]);
             standardizedDeathsSerie.Header = "Excess deaths";
-            var vaxChart = evolutionChart.PlotArea.ChartTypes.Add(eChartType.Line);
-            var vaccinationSerie = vaxChart.Series.Add(workSheet.Cells[_iStartWeekly, 3, workSheet.Dimension.End.Row, 3], workSheet.Cells[_iStartWeekly, 1, workSheet.Dimension.End.Row, 1]);
+            var vaxChart = evolutionChart.PlotArea.ChartTypes.Add(eChartType.XYScatterLinesNoMarkers);
+            var vaccinationSerie = vaxChart.Series.Add(workSheet.Cells[_iStartWeekly+1+offset, 3, workSheet.Dimension.End.Row, 3], workSheet.Cells[_iStartWeekly+1+offset, 1, workSheet.Dimension.End.Row, 1]);
             vaccinationSerie.Header = "Injections";
-            evolutionChart.UseSecondaryAxis = true;
-            evolutionChart.SetPosition(3, 0, 7, 0);
+            vaxChart.UseSecondaryAxis = true;
+            evolutionChart.XAxis.Crosses = eCrosses.Min;
+            evolutionChart.SetPosition(3 + startChartRow, 0, 7, 0);
             evolutionChart.SetSize(900, 500);
         }
         public void Save()

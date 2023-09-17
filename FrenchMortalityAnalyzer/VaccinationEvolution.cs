@@ -67,10 +67,6 @@ namespace FrenchMortalityAnalyzer
 
             }
             BuildLinearRegression(SlidingWeeks, (int)new DateTime(MinYearRegression, 1, 1).ToOADate(), (int)new DateTime(MaxYearRegression, 1, 1).ToOADate());
-            for (int i = 0; i < 300; i++)
-            {
-                SlidingWeeks.Rows.RemoveAt(0);
-            }
         }
     }
 }
