@@ -19,9 +19,10 @@ class Program
         if (args.Length == 0)
             return MortalityEvolution(new MortalityEvolution());
 
-        return Parser.Default.ParseArguments<MortalityEvolution, InitOptions, ShowOptions>(args)
+        return Parser.Default.ParseArguments<MortalityEvolutionOptions, VaccinationEvolutionOptions, InitOptions, ShowOptions>(args)
             .MapResult(
-              (MortalityEvolution opts) => MortalityEvolution(opts),
+              (MortalityEvolutionOptions opts) => MortalityEvolution(opts),
+              (VaccinationEvolutionOptions opts) => VaccinationEvolution(opts),
               (InitOptions opts) => Init(opts),
               (ShowOptions opts) => Show(opts),
               errs => 1);
@@ -34,6 +35,19 @@ class Program
             mortalityEvolution.DatabaseEngine = databaseEngine;
             mortalityEvolution.Generate();
             MortalityEvolutionView mortalityEvolutionView = new MortalityEvolutionView { MortalityEvolution = mortalityEvolution };
+            mortalityEvolutionView.Save();
+        }
+
+        return 0;
+    }
+    static int VaccinationEvolution(VaccinationEvolution mortalityEvolution)
+    {
+        Init(mortalityEvolution);
+        using (DatabaseEngine databaseEngine = GetDatabaseEngine(mortalityEvolution.Folder))
+        {
+            mortalityEvolution.DatabaseEngine = databaseEngine;
+            mortalityEvolution.Generate();
+            VaccinationEvolutionView mortalityEvolutionView = new VaccinationEvolutionView { MortalityEvolution = mortalityEvolution };
             mortalityEvolutionView.Save();
         }
 

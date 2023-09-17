@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace FrenchMortalityAnalyzer
 {
-    [Verb("evolution", HelpText = "French mortality evolution by years/semesters")]
     public class MortalityEvolution : Options
     {
         [Option("MinYearRegression", Required = false, HelpText = "2012 by default")]
@@ -67,10 +66,9 @@ namespace FrenchMortalityAnalyzer
             BuildLinearRegression(DataTable, MinYearRegression, MaxYearRegression);
             BuildExcessHistogram();
             BuildVaccinationStatistics();
-            BuildWeeklyVaccinationStatistics();
         }
 
-        private void AddConditions(StringBuilder conditionBuilder)
+        protected void AddConditions(StringBuilder conditionBuilder)
         {
             if (!WholePeriods)
                 AddCondition($"DayOfYear <= {LastDay.DayOfYear}", conditionBuilder);
@@ -121,13 +119,13 @@ namespace FrenchMortalityAnalyzer
             return days;
         }
 
-        private void AddCondition(string condition, StringBuilder conditionsBuilder)
+        protected void AddCondition(string condition, StringBuilder conditionsBuilder)
         {
             if (conditionsBuilder.Length > 0)
                 conditionsBuilder.Append(" AND ");
             conditionsBuilder.Append(condition);
         }
-        private const string Query_Years = @"SELECT {1}, SUM(DeathStatistics{2}.StandardizedDeaths) AS Standardized, SUM(DeathStatistics{2}.Deaths) AS Raw  FROM DeathStatistics{2}{0}
+        protected const string Query_Years = @"SELECT {1}, SUM(DeathStatistics{2}.StandardizedDeaths) AS Standardized, SUM(DeathStatistics{2}.Deaths) AS Raw  FROM DeathStatistics{2}{0}
 GROUP BY {1}
 ORDER BY {1}";
 
@@ -141,7 +139,7 @@ ORDER BY {1}";
                 default: return nameof(DeathStatistic.Year);
             }
         }
-        private static void BuildLinearRegression(DataTable dataTable, int minYearRegression, int maxYearRegression)
+        protected static void BuildLinearRegression(DataTable dataTable, int minYearRegression, int maxYearRegression)
         {
             List<double> xVals = new List<double>();
             List<double> yVals = new List<double>();
@@ -253,8 +251,6 @@ ORDER BY {1}";
         }
         double DeathRate { get; set; }
 
-        public DataTable SlidingWeeks { get; private set; }
-
         void BuildExcessHistogram()
         {
             var values = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(GetTimeGroupingField(TimeMode))) > MinYearRegression).Select(r => r.Field<double>("Excess")).ToArray();
@@ -291,7 +287,7 @@ ORDER BY {1}";
                 ExcessHistogram.Rows.Add(dataRow);
             }
         }
-        private const string Query_Vaccination = @"SELECT {1}, SUM(SecondDose) AS Injections FROM VaxStatistics{0}
+        protected const string Query_Vaccination = @"SELECT {1}, SUM(SecondDose) AS Injections FROM VaxStatistics{0}
 GROUP BY {1}
 ORDER BY {1}";
         void BuildVaccinationStatistics()
@@ -312,58 +308,6 @@ ORDER BY {1}";
                 string filter = $"{GetTimeGroupingField(TimeMode)}={Convert.ToDouble(dataRow[0]).ToString(CultureInfo.InvariantCulture)}";
                 DataRow[] rows = DataTable.Select(filter);
                 rows[0][injectionsColumn] = dataRow[1];
-            }
-        }
-        void BuildWeeklyVaccinationStatistics()
-        {
-            StringBuilder conditionBuilder = new StringBuilder();
-            AddConditions(conditionBuilder);
-            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", "Week");
-            DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
-            query = string.Format(Query_Years, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", "Week", "");
-            DataTable deathStatistics = DatabaseEngine.GetDataTable(query);
-
-            vaccinationStatistics.PrimaryKey = new DataColumn[] { vaccinationStatistics.Columns[0] };
-            deathStatistics.PrimaryKey = new DataColumn[] { deathStatistics.Columns[0] };
-            DataColumn injectionsColumn = deathStatistics.Columns.Add("Injections", typeof(int));
-            foreach (DataRow dataRow in deathStatistics.Rows)
-                dataRow[injectionsColumn] = 0;
-            if (WholePeriods)
-            {
-                vaccinationStatistics.Rows.Remove(vaccinationStatistics.Rows[vaccinationStatistics.Rows.Count - 1]);
-                deathStatistics.Rows.Remove(deathStatistics.Rows[deathStatistics.Rows.Count - 1]);
-            }
-            foreach (DataRow dataRow in vaccinationStatistics.Rows)
-            {
-                string filter = $"Week=#{Convert.ToDateTime(dataRow[0]).ToString(CultureInfo.InvariantCulture)}#";
-                DataRow[] rows = deathStatistics.Select(filter);
-                rows[0][injectionsColumn] = dataRow[1];
-            }
-
-            SlidingWeeks = new DataTable();
-            SlidingWeeks.Columns.Add("Week", typeof(DateTime));
-            SlidingWeeks.Columns.Add("Deaths", typeof(double));
-            SlidingWeeks.Columns.Add("Injections", typeof(int));
-            Queue<DataRow> queue = new Queue<DataRow>();
-            double deaths = 0;
-            int injections = 0;
-            foreach (DataRow dataRow in deathStatistics.Rows)
-            {
-                deaths += (double)dataRow[1];
-                injections += (int)dataRow[3];
-                queue.Enqueue(dataRow);
-                if (queue.Count < 12)
-                    continue;
-                DataRow firstWeek = queue.Dequeue();
-                SlidingWeeks.Rows.Add(new object[] { dataRow[0], deaths, injections });
-                deaths -= (double)firstWeek[1];
-                injections -= (int)firstWeek[3];
-
-            }
-            BuildLinearRegression(SlidingWeeks, (int)new DateTime(MinYearRegression, 1, 1).ToOADate(), (int)new DateTime(MaxYearRegression, 1, 1).ToOADate());
-            for (int i = 0; i < 300; i++)
-            {
-                SlidingWeeks.Rows.RemoveAt(0);
             }
         }
     }
