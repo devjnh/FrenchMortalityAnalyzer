@@ -65,7 +65,6 @@ namespace FrenchMortalityAnalyzer
                 }
             BuildLinearRegression(DataTable, MinYearRegression, MaxYearRegression);
             BuildExcessHistogram();
-            BuildVaccinationStatistics();
         }
 
         protected void AddConditions(StringBuilder conditionBuilder)
@@ -285,29 +284,6 @@ ORDER BY {1}";
                 double y = Math.Exp(-0.5 * Math.Pow(x / StandardDeviation, 2)) / (Math.Sqrt(2 * Math.PI) * StandardDeviation) * resolution * values.Count();
                 dataRow["Normal"] = y;
                 ExcessHistogram.Rows.Add(dataRow);
-            }
-        }
-        protected const string Query_Vaccination = @"SELECT {1}, SUM(SecondDose) AS Injections FROM VaxStatistics{0}
-GROUP BY {1}
-ORDER BY {1}";
-        void BuildVaccinationStatistics()
-        {
-            StringBuilder conditionBuilder = new StringBuilder();
-            AddConditions(conditionBuilder);
-            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", GetTimeGroupingField(TimeMode));
-            DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
-            vaccinationStatistics.PrimaryKey = new DataColumn[] { vaccinationStatistics.Columns[0] };
-            DataTable.PrimaryKey = new DataColumn[] { DataTable.Columns[0] };
-            DataColumn injectionsColumn = DataTable.Columns.Add("Injections", typeof(int));
-            foreach (DataRow dataRow in DataTable.Rows)
-                dataRow[injectionsColumn] = 0;
-            if (WholePeriods)
-                vaccinationStatistics.Rows.Remove(vaccinationStatistics.Rows[vaccinationStatistics.Rows.Count - 1]);
-            foreach (DataRow dataRow in vaccinationStatistics.Rows)
-            {
-                string filter = $"{GetTimeGroupingField(TimeMode)}={Convert.ToDouble(dataRow[0]).ToString(CultureInfo.InvariantCulture)}";
-                DataRow[] rows = DataTable.Select(filter);
-                rows[0][injectionsColumn] = dataRow[1];
             }
         }
     }

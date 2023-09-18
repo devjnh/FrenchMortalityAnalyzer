@@ -20,6 +20,9 @@ namespace FrenchMortalityAnalyzer
         {
             BuildWeeklyVaccinationStatistics();
         }
+        protected const string Query_Vaccination = @"SELECT {1}, SUM(SecondDose) AS Injections FROM VaxStatistics{0}
+GROUP BY {1}
+ORDER BY {1}";
         void BuildWeeklyVaccinationStatistics()
         {
             StringBuilder conditionBuilder = new StringBuilder();
