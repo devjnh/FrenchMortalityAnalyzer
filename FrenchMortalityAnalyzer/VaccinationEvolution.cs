@@ -13,6 +13,7 @@ namespace FrenchMortalityAnalyzer
     {
         [Option("SlidingWeeks", Required = false, HelpText = "12 sliding weeks by default")]
         public int Weeks { get; set; } = 12;
+        public string TimeField { get; set; } = "Week";
 
         public DataTable SlidingWeeks { get; private set; }
         public new void Generate()
@@ -24,9 +25,9 @@ namespace FrenchMortalityAnalyzer
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
             AddCondition($"Year > {MinYearRegression}", conditionBuilder);
-            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", "Week");
+            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField);
             DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
-            query = string.Format(Query_Years, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", "Week", "");
+            query = string.Format(Query_Years, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, "");
             DataTable deathStatistics = DatabaseEngine.GetDataTable(query);
 
             vaccinationStatistics.PrimaryKey = new DataColumn[] { vaccinationStatistics.Columns[0] };
@@ -41,13 +42,13 @@ namespace FrenchMortalityAnalyzer
             }
             foreach (DataRow dataRow in vaccinationStatistics.Rows)
             {
-                string filter = $"Week=#{Convert.ToDateTime(dataRow[0]).ToString(CultureInfo.InvariantCulture)}#";
+                string filter = $"{TimeField}=#{Convert.ToDateTime(dataRow[0]).ToString(CultureInfo.InvariantCulture)}#";
                 DataRow[] rows = deathStatistics.Select(filter);
                 rows[0][injectionsColumn] = dataRow[1];
             }
 
             SlidingWeeks = new DataTable();
-            SlidingWeeks.Columns.Add("Week", typeof(DateTime));
+            SlidingWeeks.Columns.Add(TimeField, typeof(DateTime));
             SlidingWeeks.Columns.Add("Deaths", typeof(double));
             SlidingWeeks.Columns.Add("Injections", typeof(int));
             Queue<DataRow> queue = new Queue<DataRow>();

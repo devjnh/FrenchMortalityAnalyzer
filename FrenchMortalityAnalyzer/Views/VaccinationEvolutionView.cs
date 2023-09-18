@@ -16,7 +16,7 @@ namespace FrenchMortalityAnalyzer.Views
     {
         public string MinAgeText => MortalityEvolution.MinAge >= 0 ? MortalityEvolution.MinAge.ToString() : string.Empty;
         public string MaxAgeText => MortalityEvolution.MaxAge >= 0 ? MortalityEvolution.MaxAge.ToString() : string.Empty;
-        private string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.Weeks}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}";
+        private string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeField}{MortalityEvolution.Weeks}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}";
         public VaccinationEvolution MortalityEvolution { get; set; }
         private string TimeModeText => $"{MortalityEvolution.Weeks} weeks";
         private string GetSheetName()
