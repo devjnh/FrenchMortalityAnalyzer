@@ -82,8 +82,8 @@ namespace FrenchMortalityAnalyzer.Views
         private void BuildWeeklyEvolutionChart(ExcelWorksheet workSheet, int iLastRow, int offset = 0, int startChartRow = 0)
         {
             ExcelChart evolutionChart = workSheet.Drawings.AddChart($"WeeklyExcessEvolutionChart{offset}", eChartType.XYScatterLinesNoMarkers);
-            var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[_iStartWeekly+1+offset, 5, iLastRow, 5], workSheet.Cells[_iStartWeekly+1+offset, 1, iLastRow, 1]);
-            standardizedDeathsSerie.Header = "Excess deaths";
+            var excessDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[_iStartWeekly+1+offset, 6, iLastRow, 6], workSheet.Cells[_iStartWeekly+1+offset, 1, iLastRow, 1]);
+            excessDeathsSerie.Header = "Excess deaths (%)";
             var vaxChart = evolutionChart.PlotArea.ChartTypes.Add(eChartType.XYScatterLinesNoMarkers);
             var vaccinationSerie = vaxChart.Series.Add(workSheet.Cells[_iStartWeekly+1+offset, 3, workSheet.Dimension.End.Row, 3], workSheet.Cells[_iStartWeekly+1+offset, 1, workSheet.Dimension.End.Row, 1]);
             vaccinationSerie.Header = "Injections";

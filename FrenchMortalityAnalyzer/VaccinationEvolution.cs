@@ -65,7 +65,7 @@ ORDER BY {1}";
                 if (queue.Count < Weeks)
                     continue;
                 DataRow firstWeek = queue.Dequeue();
-                SlidingWeeks.Rows.Add(new object[] { dataRow[0], deaths, injections });
+                SlidingWeeks.Rows.Add(new object[] { dataRow[0], deaths / Weeks, injections /Weeks });
                 deaths -= (double)firstWeek[1];
                 injections -= (int)firstWeek[3];
 
