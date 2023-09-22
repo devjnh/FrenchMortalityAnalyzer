@@ -151,7 +151,7 @@ ORDER BY {1}";
             List<double> yVals = new List<double>();
             foreach (DataRow dataRow in dataTable.Rows)
             {
-                double year = dataRow[0] is DateTime ? ((DateTime)dataRow[0]).ToOADate() : Convert.ToDouble(dataRow[0]);
+                double year = TimeToDouble(dataRow[0]);
                 if (year < minYearRegression || year >= maxYearRegression)
                     continue;
                 xVals.Add(year);
@@ -164,7 +164,7 @@ ORDER BY {1}";
             dataTable.Columns.Add("RelativeExcess", typeof(double));
             foreach (DataRow dataRow in dataTable.Rows)
             {
-                double year = dataRow[0] is DateTime ? ((DateTime)dataRow[0]).ToOADate() : Convert.ToDouble(dataRow[0]);
+                double year = TimeToDouble(dataRow[0]);
                 double baseLine = yintercept + slope * year;
                 dataRow["BaseLine"] = baseLine;
                 double excess = Convert.ToDouble(dataRow[1]) - baseLine;
@@ -172,6 +172,12 @@ ORDER BY {1}";
                 dataRow["RelativeExcess"] = excess / baseLine;
             }
         }
+
+        private static double TimeToDouble(object value)
+        {
+            return value is DateTime ? ((DateTime)value).ToOADate() : Convert.ToDouble(value);
+        }
+
         /// <summary>
         /// Fits a line to a collection of (x,y) points.
         /// </summary>
