@@ -24,7 +24,6 @@ namespace MortalityAnalyzer
         public DatabaseEngine DatabaseEngine { get; set; }
         public AgeStructure AgeStructure { get; set; }
 
-        static public int ReferenceYear { get; set; } = 2022;
         public void BuildStatistics(GenderFilter genderFilter)
         {
             Console.WriteLine($"Building death statistics. Gender: {genderFilter}");
@@ -42,7 +41,7 @@ namespace MortalityAnalyzer
                     deathStatistic.Age = (int)reader[1];
                     deathStatistic.Deaths = Convert.ToInt32(reader[2]);
                     deathStatistic.Population = AgeStructure.GetPopulation(deathStatistic.Date.Year, deathStatistic.Age, genderFilter);
-                    deathStatistic.RefPopulation = AgeStructure.GetPopulation(ReferenceYear, deathStatistic.Age, genderFilter);
+                    deathStatistic.RefPopulation = AgeStructure.GetPopulation(AgeStructure.ReferenceYear, deathStatistic.Age, genderFilter);
                     deathStatistic.StandardizedDeaths = (double)deathStatistic.Deaths * deathStatistic.RefPopulation / deathStatistic.Population;
                     if (year != deathStatistic.Date.Year)
                     {

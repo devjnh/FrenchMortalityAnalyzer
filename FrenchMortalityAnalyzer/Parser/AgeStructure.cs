@@ -13,6 +13,7 @@ namespace MortalityAnalyzer
 {
     class AgeStructure
     {
+        static public int ReferenceYear { get; set; } = 2022;
         public DataTable DataTable { get; private set; } = new DataTable { TableName = "AgeStructure" };
         public DatabaseEngine DatabaseEngine { get; set; }
 

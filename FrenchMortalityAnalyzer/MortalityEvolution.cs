@@ -39,14 +39,19 @@ namespace MortalityAnalyzer
             else
                 LastDay = Convert.ToDateTime(DatabaseEngine.GetValue($"SELECT MAX(Date) FROM {DeathStatistic.StatisticsTableName}")).AddDays(-ToDateDelay);
 
+            string countryCondition = GetCountryCondition();
+            AdjustMinYearRegression(countryCondition);
+
             string toDate = WholePeriods ? "" : " to date";
             Console.WriteLine($"Generating mortality evolution");
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
+            if (!string.IsNullOrWhiteSpace(countryCondition))
+                AddCondition(countryCondition, conditionBuilder);
             string tablePostfix = string.Empty;
             if (GenderMode != GenderFilter.All)
                 tablePostfix = $"_{GenderMode}";
-            string query = string.Format(Query_Years, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", GetTimeGroupingField(TimeMode), tablePostfix);
+            string query = string.Format(GetQueryTemplate(), conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", GetTimeGroupingField(TimeMode), tablePostfix);
             DataTable = DatabaseEngine.GetDataTable(query);
             if (TimeMode == TimeMode.DeltaYear)
                 DataTable.Rows.Remove(DataTable.Rows[0]);
@@ -55,11 +60,25 @@ namespace MortalityAnalyzer
             if (WholePeriods)
                 foreach (DataRow dataRow in DataTable.Rows)
                 {
-                    double days = GetPeriodLength(Convert.ToDouble(dataRow[0]));
+                    double days = GetPeriodLength(dataRow);
                     dataRow[1] = Convert.ToDouble(dataRow[1]) * StandardizedPeriodLength / days; // Standardize according to period length
                 }
+            CleanDataTable();
             BuildLinearRegression(DataTable, MinYearRegression, MaxYearRegression);
             BuildExcessHistogram();
+        }
+
+        protected string GetQueryTemplate()
+        {
+            return Query_Years;
+        }
+
+        protected void CleanDataTable()
+        {
+        }
+
+        protected void AdjustMinYearRegression(string countryCondition)
+        {
         }
 
         protected void AddConditions(StringBuilder conditionBuilder)
@@ -70,10 +89,7 @@ namespace MortalityAnalyzer
                 AddCondition($"Age >= {MinAge}", conditionBuilder);
             if (MaxAge > 0)
                 AddCondition($"Age < {MaxAge}", conditionBuilder);
-            if (TimeMode == TimeMode.Semester)
-                AddCondition($"Year > {MinYearRegression - 1}", conditionBuilder);
-            else if (TimeMode == TimeMode.Quarter)
-                AddCondition($"Year > {MinYearRegression}", conditionBuilder);
+            AddCondition($"Year > {MinYearRegression}", conditionBuilder);
         }
 
         public double StandardizedPeriodLength => 365 * PeriodInFractionOfYear;
@@ -102,6 +118,11 @@ namespace MortalityAnalyzer
                     _ => 12
                 };
             }
+        }
+
+        protected double GetPeriodLength(DataRow dataRow)
+        {
+            return GetPeriodLength(Convert.ToDouble(dataRow[0]));
         }
 
         private double GetPeriodLength(double period)
@@ -248,7 +269,10 @@ ORDER BY {1}";
         {
             get
             {
-                string sqlCommand = $"SELECT SUM(Population) FROM AgeStructure WHERE Year = {DeathStatistics.ReferenceYear}";
+                string sqlCommand = GetPopulationSqlQuery();
+                string countryCondition = GetCountryCondition();
+                if (!string.IsNullOrEmpty(countryCondition))
+                    sqlCommand += $" AND {countryCondition}";
                 if (MinAge >= 0)
                     sqlCommand += $" AND Age >= {MinAge}";
                 if (MaxAge >= 0)
@@ -256,7 +280,17 @@ ORDER BY {1}";
                 return Convert.ToInt32(DatabaseEngine.GetValue(sqlCommand));
             }
         }
+
+        protected string GetPopulationSqlQuery()
+        {
+            return $"SELECT SUM(Population) FROM AgeStructure WHERE Year = {AgeStructure.ReferenceYear}";
+        }
+
         public string Country => "France";
+        private string GetCountryCondition()
+        {
+            return "";
+        }
         public string GetCountryDisplayName() => Country;
         public string GetCountryInternalName() => Country;
         double DeathRate { get; set; }
