@@ -33,10 +33,7 @@ namespace MortalityAnalyzer
         internal DatabaseEngine DatabaseEngine { get; set; }
         public DataTable DataTable { get; private set; }
         public bool WholePeriods => TimeMode != TimeMode.YearToDate;
-        public string Country => "France";
-        public string GetCountryDisplayName() => Country;
-        public string GetCountryInternalName() => Country;
-
+        
         public void Generate()
         {
             if (WholePeriods)
@@ -61,7 +58,7 @@ namespace MortalityAnalyzer
                 foreach (DataRow dataRow in DataTable.Rows)
                 {
                     double days = GetPeriodLength(Convert.ToDouble(dataRow[0]));
-                    dataRow[1] = (double)dataRow[1] * StandardizedPeriodLength / days; // Standardize according to period length
+                    dataRow[1] = Convert.ToDouble(dataRow[1]) * StandardizedPeriodLength / days; // Standardize according to period length
                 }
             BuildLinearRegression(DataTable, MinYearRegression, MaxYearRegression);
             BuildExcessHistogram();
@@ -261,6 +258,9 @@ ORDER BY {1}";
                 return Convert.ToInt32(DatabaseEngine.GetValue(sqlCommand));
             }
         }
+        public string Country => "France";
+        public string GetCountryDisplayName() => Country;
+        public string GetCountryInternalName() => Country;
         double DeathRate { get; set; }
 
         void BuildExcessHistogram()
