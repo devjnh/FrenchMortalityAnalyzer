@@ -108,12 +108,19 @@ namespace MortalityAnalyzer
                 };
             }
         }
+
         private double GetPeriodLength(double period)
         {
             int year = (int)period;
             int month = TimeMode == TimeMode.DeltaYear ? 7 : (int)((period - year) * 12) + 1;
             DateTime periodStart = new DateTime(year, month, 1);
             DateTime periodEnd = periodStart.AddMonths(PeriodInMonths);
+            double days = (periodEnd - periodStart).TotalDays;
+            return days;
+        }
+        private double GetPeriodLength(DateTime periodStart, DateTime periodEnd)
+        {
+
             double days = (periodEnd - periodStart).TotalDays;
             return days;
         }
@@ -287,4 +294,5 @@ ORDER BY {1}";
             }
         }
     }
+    public enum TimeMode { Year, DeltaYear, Semester, Quarter, YearToDate }
 }
