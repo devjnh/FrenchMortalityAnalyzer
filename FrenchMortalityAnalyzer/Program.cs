@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using FrenchMortalityAnalyzer;
-using FrenchMortalityAnalyzer.Views;
+using MortalityAnalyzer;
+using MortalityAnalyzer.Views;
 using OfficeOpenXml;
 using CommandLine;
 using System.Diagnostics;
-using MortalityAnalyzer;
-using FrenchMortalityAnalyzer.Parser;
+using MortalityAnalyzer.Parser;
 
 class Program
 {

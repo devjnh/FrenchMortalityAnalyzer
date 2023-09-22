@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FrenchMortalityAnalyzer.Views
+namespace MortalityAnalyzer.Views
 {
     internal class VaccinationEvolutionView
     {

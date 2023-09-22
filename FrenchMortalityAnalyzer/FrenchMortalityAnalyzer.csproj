@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>10.0</LangVersion>
     <FileVersion>1.0.2.0</FileVersion>
+    <RootNamespace>MortalityAnalyzer</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

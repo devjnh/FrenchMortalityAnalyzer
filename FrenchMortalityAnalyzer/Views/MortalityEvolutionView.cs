@@ -11,7 +11,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 
-namespace FrenchMortalityAnalyzer.Views
+namespace MortalityAnalyzer.Views
 {
     internal class MortalityEvolutionView
     {

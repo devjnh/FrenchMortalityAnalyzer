@@ -11,7 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace FrenchMortalityAnalyzer.Parser
+namespace MortalityAnalyzer.Parser
 {
     internal class FrenchCovidVaxData : CsvParser
     {
