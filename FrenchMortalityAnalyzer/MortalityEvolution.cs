@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MortalityAnalyzer
 {
-    public class MortalityEvolution : Options
+    public abstract class MortalityEvolution : Options
     {
         [Option("MinYearRegression", Required = false, HelpText = "2012 by default")]
         public int MinYearRegression { get; set; } = 2012;
@@ -68,19 +68,6 @@ namespace MortalityAnalyzer
             BuildExcessHistogram();
         }
 
-        protected string GetQueryTemplate()
-        {
-            return Query_Years;
-        }
-
-        protected void CleanDataTable()
-        {
-        }
-
-        protected void AdjustMinYearRegression(string countryCondition)
-        {
-        }
-
         protected void AddConditions(StringBuilder conditionBuilder)
         {
             if (!WholePeriods)
@@ -89,7 +76,7 @@ namespace MortalityAnalyzer
                 AddCondition($"Age >= {MinAge}", conditionBuilder);
             if (MaxAge > 0)
                 AddCondition($"Age < {MaxAge}", conditionBuilder);
-            AddCondition($"Year > {MinYearRegression}", conditionBuilder);
+            AddCondition($"Year >= {MinYearRegression}", conditionBuilder);
         }
 
         public double StandardizedPeriodLength => 365 * PeriodInFractionOfYear;
@@ -120,12 +107,7 @@ namespace MortalityAnalyzer
             }
         }
 
-        protected double GetPeriodLength(DataRow dataRow)
-        {
-            return GetPeriodLength(Convert.ToDouble(dataRow[0]));
-        }
-
-        private double GetPeriodLength(double period)
+        protected double GetPeriodLength(double period)
         {
             int year = (int)period;
             int month = TimeMode == TimeMode.DeltaYear ? 7 : (int)((period - year) * 12) + 1;
@@ -134,7 +116,7 @@ namespace MortalityAnalyzer
             double days = (periodEnd - periodStart).TotalDays;
             return days;
         }
-        private double GetPeriodLength(DateTime periodStart, DateTime periodEnd)
+        protected double GetPeriodLength(DateTime periodStart, DateTime periodEnd)
         {
 
             double days = (periodEnd - periodStart).TotalDays;
@@ -147,9 +129,6 @@ namespace MortalityAnalyzer
                 conditionsBuilder.Append(" AND ");
             conditionsBuilder.Append(condition);
         }
-        protected const string Query_Years = @"SELECT {1}, SUM(DeathStatistics{2}.StandardizedDeaths) AS Standardized, SUM(DeathStatistics{2}.Deaths) AS Raw  FROM DeathStatistics{2}{0}
-GROUP BY {1}
-ORDER BY {1}";
 
         string GetTimeGroupingField(TimeMode mode)
         {
@@ -281,18 +260,7 @@ ORDER BY {1}";
             }
         }
 
-        protected string GetPopulationSqlQuery()
-        {
-            return $"SELECT SUM(Population) FROM AgeStructure WHERE Year = {AgeStructure.ReferenceYear}";
-        }
 
-        public string Country => "France";
-        private string GetCountryCondition()
-        {
-            return "";
-        }
-        public string GetCountryDisplayName() => Country;
-        public string GetCountryInternalName() => Country;
         double DeathRate { get; set; }
 
         void BuildExcessHistogram()
@@ -331,6 +299,22 @@ ORDER BY {1}";
                 ExcessHistogram.Rows.Add(dataRow);
             }
         }
+        protected abstract string GetQueryTemplate();
+
+        protected virtual void CleanDataTable()
+        {
+        }
+
+        protected virtual void AdjustMinYearRegression(string countryCondition)
+        {
+        }
+
+        protected abstract double GetPeriodLength(DataRow dataRow);
+
+        protected abstract string GetPopulationSqlQuery();
+        protected virtual string GetCountryCondition() => String.Empty;
+        public virtual string GetCountryDisplayName() => String.Empty;
+        public virtual string GetCountryInternalName() => String.Empty;
     }
     public enum TimeMode { Year, DeltaYear, Semester, Quarter, YearToDate }
 }

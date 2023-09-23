@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MortalityAnalyzer
 {
-    public class VaccinationEvolution : MortalityEvolution
+    public class VaccinationEvolution : FrenchMortalityEvolution
     {
         [Option("SlidingWeeks", Required = false, HelpText = "12 sliding weeks by default")]
         public int Weeks { get; set; } = 12;

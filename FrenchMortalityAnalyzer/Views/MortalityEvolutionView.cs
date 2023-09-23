@@ -116,7 +116,7 @@ namespace MortalityAnalyzer.Views
         private void BuildHeader(ExcelWorksheet workSheet)
         {
             workSheet.Row(1).Style.Font.Bold = true;
-            workSheet.Cells[1, 1].Value = $"{MortalityEvolution.Country} mortality evolution by {TimeModeText}";
+            workSheet.Cells[1, 1].Value = $"{MortalityEvolution.GetCountryDisplayName()} mortality evolution by {TimeModeText}";
             workSheet.Cells[1, 5].Value = Period;
             workSheet.Cells[1, 7].Value = GenderModeText;
             workSheet.Cells[1, 9].Value = AgeRange;

@@ -24,7 +24,7 @@ namespace MortalityAnalyzer
     {
     }
     [Verb("evolution", HelpText = "French mortality evolution by years/semesters")]
-    public class MortalityEvolutionOptions : MortalityEvolution
+    public class MortalityEvolutionOptions : FrenchMortalityEvolution
     {
     }
     [Verb("vaxevolution", HelpText = "Mortality and Covid vaccine injections evolution by sliding weeks")]

@@ -16,7 +16,7 @@ class Program
     static int Main(string[] args)
     {
         if (args.Length == 0)
-            return MortalityEvolution(new MortalityEvolution());
+            return MortalityEvolution(new FrenchMortalityEvolution());
 
         return Parser.Default.ParseArguments<MortalityEvolutionOptions, VaccinationEvolutionOptions, InitOptions, ShowOptions>(args)
             .MapResult(
