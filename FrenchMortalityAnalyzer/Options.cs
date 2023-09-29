@@ -28,7 +28,7 @@ namespace MortalityAnalyzer
     {
     }
     [Verb("vaxevolution", HelpText = "Mortality and Covid vaccine injections evolution by sliding weeks")]
-    public class VaccinationEvolutionOptions : VaccinationEvolution
+    public class VaccinationEvolutionOptions : FrenchVaccinationEvolution
     {
     }
 }

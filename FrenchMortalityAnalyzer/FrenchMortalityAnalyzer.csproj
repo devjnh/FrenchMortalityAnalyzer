@@ -20,4 +20,8 @@
     <Reference Include="System.Data.DataSetExtensions" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\" />
+  </ItemGroup>
+
 </Project>

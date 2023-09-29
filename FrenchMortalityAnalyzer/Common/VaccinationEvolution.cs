@@ -16,11 +16,7 @@ namespace MortalityAnalyzer
         public string TimeField { get; set; } = "Week";
 
         public DataTable SlidingWeeks { get; private set; }
-        public VaccinationEvolution()
-        {
-            _Implementation = new FrenchImplementation { MortalityEvolution = this };
-        }
-        public new void Generate()
+        public override void Generate()
         {
             BuildWeeklyVaccinationStatistics();
         }

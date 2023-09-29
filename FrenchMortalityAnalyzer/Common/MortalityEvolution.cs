@@ -33,7 +33,7 @@ namespace MortalityAnalyzer
         public DataTable DataTable { get; private set; }
         public bool WholePeriods => TimeMode != TimeMode.YearToDate;
         
-        public void Generate()
+        public virtual void Generate()
         {
             if (WholePeriods)
                 LastDay = DateTime.MaxValue;
@@ -313,6 +313,8 @@ namespace MortalityAnalyzer
         public virtual string GetCountryDisplayName() => _Implementation.GetCountryDisplayName();
         public virtual string GetCountryInternalName() => _Implementation.GetCountryInternalName();
         protected SpecificImplementation _Implementation;
+        public SpecificImplementation Implementation => _Implementation;
+       
     }
     public enum TimeMode { Year, DeltaYear, Semester, Quarter, YearToDate }
 }
