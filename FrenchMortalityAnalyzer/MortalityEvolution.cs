@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using MortalityAnalyzer.Common;
 using MortalityAnalyzer.Model;
 using System;
 using System.Collections.Generic;
@@ -107,7 +108,7 @@ namespace MortalityAnalyzer
             }
         }
 
-        protected double GetPeriodLength(double period)
+        public double GetPeriodLength(double period)
         {
             int year = (int)period;
             int month = TimeMode == TimeMode.DeltaYear ? 7 : (int)((period - year) * 12) + 1;
@@ -116,7 +117,7 @@ namespace MortalityAnalyzer
             double days = (periodEnd - periodStart).TotalDays;
             return days;
         }
-        protected double GetPeriodLength(DateTime periodStart, DateTime periodEnd)
+        public double GetPeriodLength(DateTime periodStart, DateTime periodEnd)
         {
 
             double days = (periodEnd - periodStart).TotalDays;
@@ -299,22 +300,19 @@ namespace MortalityAnalyzer
                 ExcessHistogram.Rows.Add(dataRow);
             }
         }
-        protected abstract string GetQueryTemplate();
+        protected virtual string GetQueryTemplate() => _Implementation.GetQueryTemplate();
 
-        protected virtual void CleanDataTable()
-        {
-        }
+        protected virtual void CleanDataTable() => _Implementation.CleanDataTable();
 
-        protected virtual void AdjustMinYearRegression(string countryCondition)
-        {
-        }
+        protected virtual void AdjustMinYearRegression(string countryCondition) => _Implementation.AdjustMinYearRegression(countryCondition);
 
-        protected abstract double GetPeriodLength(DataRow dataRow);
+        protected virtual double GetPeriodLength(DataRow dataRow) => _Implementation.GetPeriodLength(dataRow);
 
-        protected abstract string GetPopulationSqlQuery();
-        protected virtual string GetCountryCondition() => String.Empty;
-        public virtual string GetCountryDisplayName() => String.Empty;
-        public virtual string GetCountryInternalName() => String.Empty;
+        protected virtual string GetPopulationSqlQuery() => _Implementation.GetPopulationSqlQuery();
+        protected virtual string GetCountryCondition() => _Implementation.GetCountryCondition();
+        public virtual string GetCountryDisplayName() => _Implementation.GetCountryDisplayName();
+        public virtual string GetCountryInternalName() => _Implementation.GetCountryInternalName();
+        protected SpecificImplementation _Implementation;
     }
     public enum TimeMode { Year, DeltaYear, Semester, Quarter, YearToDate }
 }

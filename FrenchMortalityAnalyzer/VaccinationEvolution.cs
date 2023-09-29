@@ -9,13 +9,17 @@ using System.Threading.Tasks;
 
 namespace MortalityAnalyzer
 {
-    public class VaccinationEvolution : FrenchMortalityEvolution
+    public class VaccinationEvolution : MortalityEvolution
     {
         [Option("SlidingWeeks", Required = false, HelpText = "12 sliding weeks by default")]
         public int Weeks { get; set; } = 12;
         public string TimeField { get; set; } = "Week";
 
         public DataTable SlidingWeeks { get; private set; }
+        public VaccinationEvolution()
+        {
+            _Implementation = new FrenchImplementation { MortalityEvolution = this };
+        }
         public new void Generate()
         {
             BuildWeeklyVaccinationStatistics();
@@ -30,7 +34,7 @@ ORDER BY {1}";
             AddCondition($"Year > {MinYearRegression}", conditionBuilder);
             string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField);
             DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
-            query = string.Format(Query_Years, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, "");
+            query = string.Format(GetQueryTemplate(), conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, "");
             DataTable deathStatistics = DatabaseEngine.GetDataTable(query);
 
             vaccinationStatistics.PrimaryKey = new DataColumn[] { vaccinationStatistics.Columns[0] };
