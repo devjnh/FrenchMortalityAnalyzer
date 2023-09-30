@@ -302,7 +302,7 @@ namespace MortalityAnalyzer
         }
         protected virtual string GetQueryTemplate() => _Implementation.GetQueryTemplate();
 
-        protected virtual void CleanDataTable() => _Implementation.CleanDataTable();
+        protected virtual void CleanDataTable() => _Implementation.CleanDataTable(DataTable);
 
         protected virtual void AdjustMinYearRegression(string countryCondition) => _Implementation.AdjustMinYearRegression(countryCondition);
 

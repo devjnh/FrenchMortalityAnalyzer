@@ -25,9 +25,13 @@ GROUP BY {1}
 ORDER BY {1}";
         void BuildWeeklyVaccinationStatistics()
         {
+            string countryCondition = GetCountryCondition();
+            AdjustMinYearRegression(countryCondition);
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
             AddCondition($"Year > {MinYearRegression}", conditionBuilder);
+            if (!string.IsNullOrWhiteSpace(countryCondition))
+                AddCondition(countryCondition, conditionBuilder);
             string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField);
             DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
             query = string.Format(GetQueryTemplate(), conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, "");
@@ -43,11 +47,13 @@ ORDER BY {1}";
                 vaccinationStatistics.Rows.Remove(vaccinationStatistics.Rows[vaccinationStatistics.Rows.Count - 1]);
                 deathStatistics.Rows.Remove(deathStatistics.Rows[deathStatistics.Rows.Count - 1]);
             }
+            Implementation.CleanDataTable(deathStatistics);
             foreach (DataRow dataRow in vaccinationStatistics.Rows)
             {
                 string filter = $"{TimeField}=#{Convert.ToDateTime(dataRow[0]).ToString(CultureInfo.InvariantCulture)}#";
                 DataRow[] rows = deathStatistics.Select(filter);
-                rows[0][injectionsColumn] = dataRow[1];
+                if (rows.Length >= 1)
+                    rows[0][injectionsColumn] = dataRow[1];
             }
 
             SlidingWeeks = new DataTable();
