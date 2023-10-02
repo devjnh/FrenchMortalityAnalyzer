@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using MortalityAnalyzer.Common;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -76,7 +77,7 @@ ORDER BY {1}";
                 injections -= (int)firstWeek[3];
 
             }
-            BuildLinearRegression(SlidingWeeks, (int)new DateTime(MinYearRegression, 1, 1).ToOADate(), (int)new DateTime(MaxYearRegression, 1, 1).ToOADate());
+            Projection.BuildProjection(SlidingWeeks, new DateTime(MinYearRegression, 1, 1), new DateTime(MaxYearRegression, 1, 1), 1);
         }
     }
 }
