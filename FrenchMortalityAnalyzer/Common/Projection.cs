@@ -104,7 +104,7 @@ namespace MortalityAnalyzer.Common
             }
             else
             {
-                double year = (double)value;
+                double year = Convert.ToDouble(value);
                 return (int)((year - Math.Floor(year)) * yearFractions);
             }
         }

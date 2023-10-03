@@ -65,8 +65,24 @@ namespace MortalityAnalyzer
                     dataRow[1] = Convert.ToDouble(dataRow[1]) * StandardizedPeriodLength / days; // Standardize according to period length
                 }
             CleanDataTable();
-            Projection.BuildProjection(DataTable, MinYearRegression, MaxYearRegression, TimeMode == TimeMode.Quarter ? 4 : 1);
+            Projection.BuildProjection(DataTable, MinYearRegression, MaxYearRegression, PeriodsInYear);
             BuildExcessHistogram();
+        }
+
+        private int PeriodsInYear
+        {
+            get
+            {
+                switch (TimeMode)
+                {
+                    case TimeMode.Quarter:
+                        return 4;
+                    case TimeMode.Semester:
+                        return 2;
+                    default:
+                        return 1;
+                }
+            }
         }
 
         protected void AddConditions(StringBuilder conditionBuilder)
