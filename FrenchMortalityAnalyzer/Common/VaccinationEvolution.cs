@@ -60,21 +60,16 @@ ORDER BY {1}";
             SlidingWeeks = new DataTable();
             SlidingWeeks.Columns.Add(TimeField, typeof(DateTime));
             SlidingWeeks.Columns.Add("Deaths", typeof(double));
-            SlidingWeeks.Columns.Add("Injections", typeof(int));
-            Queue<DataRow> queue = new Queue<DataRow>();
-            double deaths = 0;
-            int injections = 0;
+            SlidingWeeks.Columns.Add("Injections", typeof(double));
+            WindowFilter deathsFilter = new WindowFilter(Weeks);
+            WindowFilter injectionsFilter = new WindowFilter(Weeks);
             foreach (DataRow dataRow in deathStatistics.Rows)
             {
-                deaths += (double)dataRow[1];
-                injections += (int)dataRow[3];
-                queue.Enqueue(dataRow);
-                if (queue.Count < Weeks)
+                double deaths = deathsFilter.Filter((double)dataRow[1]);
+                double injections = injectionsFilter.Filter(Convert.ToDouble(dataRow[3]));
+                if (!deathsFilter.IsBufferFull)
                     continue;
-                DataRow firstWeek = queue.Dequeue();
-                SlidingWeeks.Rows.Add(new object[] { dataRow[0], deaths / Weeks, injections /Weeks });
-                deaths -= (double)firstWeek[1];
-                injections -= (int)firstWeek[3];
+                SlidingWeeks.Rows.Add(new object[] { dataRow[0], deaths, injections });
 
             }
             Projection.BuildProjection(SlidingWeeks, new DateTime(MinYearRegression, 1, 1), new DateTime(MaxYearRegression, 1, 1), 1);
