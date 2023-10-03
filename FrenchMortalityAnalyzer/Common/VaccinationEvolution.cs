@@ -30,7 +30,7 @@ ORDER BY {1}";
             AdjustMinYearRegression(countryCondition);
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
-            AddCondition($"Year > {MinYearRegression}", conditionBuilder);
+            AddCondition($"Year >= {MinYearRegression}", conditionBuilder);
             if (!string.IsNullOrWhiteSpace(countryCondition))
                 AddCondition(countryCondition, conditionBuilder);
             string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField);
