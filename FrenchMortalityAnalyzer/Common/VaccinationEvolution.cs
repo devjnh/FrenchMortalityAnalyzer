@@ -21,9 +21,6 @@ namespace MortalityAnalyzer
         {
             BuildWeeklyVaccinationStatistics();
         }
-        protected const string Query_Vaccination = @"SELECT {1}, SUM(SecondDose) AS Injections FROM VaxStatistics{0}
-GROUP BY {1}
-ORDER BY {1}";
         void BuildWeeklyVaccinationStatistics()
         {
             string countryCondition = GetCountryCondition();
@@ -33,7 +30,7 @@ ORDER BY {1}";
             AddCondition($"Year >= {MinYearRegression}", conditionBuilder);
             if (!string.IsNullOrWhiteSpace(countryCondition))
                 AddCondition(countryCondition, conditionBuilder);
-            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField);
+            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, Injections);
             DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
             query = string.Format(GetQueryTemplate(), conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, "");
             DataTable deathStatistics = DatabaseEngine.GetDataTable(query);

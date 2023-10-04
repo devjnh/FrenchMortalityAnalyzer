@@ -76,7 +76,7 @@ namespace MortalityAnalyzer
                 BuildVaccinationStatistics();
         }
 
-        private const string Query_Vaccination = @"SELECT {1}, SUM({2}) AS Injections FROM VaxStatistics{0}
+        protected const string Query_Vaccination = @"SELECT {1}, SUM({2}) AS Injections FROM VaxStatistics{0}
 GROUP BY {1}
 ORDER BY {1}";
         void BuildVaccinationStatistics()
