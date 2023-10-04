@@ -55,62 +55,69 @@ namespace MortalityAnalyzer.Views
                 _ => "",
             };
         }
+        const int _DataColumn = 15;
         private void BuildEvolutionTable(ExcelWorksheet workSheet)
         {
-            workSheet.Cells[3, 1].LoadFromDataTable(MortalityEvolution.DataTable, true);
-            workSheet.Cells[3, 1].Value = TimePeriod;
+            workSheet.Cells[3, _DataColumn + 1].LoadFromDataTable(MortalityEvolution.DataTable, true);
+            workSheet.Cells[3, _DataColumn + 1].Value = TimePeriod;
             workSheet.Column(2).AutoFit();
             //create a range for the table
-            ExcelRange range = workSheet.Cells[3, 1, workSheet.Dimension.End.Row, 6];
+            ExcelRange range = workSheet.Cells[3, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 6];
 
             //add a table to the range
             ExcelTable tab = workSheet.Tables.Add(range, $"Table{BaseName}");
             //format the table
             tab.TableStyle = TableStyles.Light8;
-            IExcelConditionalFormattingLessThan conditionalFormating = workSheet.ConditionalFormatting.AddLessThan(workSheet.Cells[3, 2, workSheet.Dimension.End.Row - 1, 2]);
+            IExcelConditionalFormattingLessThan conditionalFormating = workSheet.ConditionalFormatting.AddLessThan(workSheet.Cells[3, _DataColumn + 2, workSheet.Dimension.End.Row - 1, _DataColumn + 2]);
             conditionalFormating.Style.Fill.BackgroundColor.Color = Color.PaleGreen;
             conditionalFormating.Style.Font.Color.Color = Color.DarkGreen;
-            conditionalFormating.Formula = workSheet.Cells[workSheet.Dimension.End.Row, 2].FullAddressAbsolute;
+            conditionalFormating.Formula = workSheet.Cells[workSheet.Dimension.End.Row, _DataColumn + 2].FullAddressAbsolute;
 
-            workSheet.Cells[3, 2, workSheet.Dimension.End.Row, 2].Style.Numberformat.Format = "0.0";
-            workSheet.Cells[3, 4, workSheet.Dimension.End.Row, 5].Style.Numberformat.Format = "0.0";
+            workSheet.Cells[3, _DataColumn + 2, workSheet.Dimension.End.Row, _DataColumn + 2].Style.Numberformat.Format = "0.0";
+            workSheet.Cells[3, _DataColumn + 4, workSheet.Dimension.End.Row, _DataColumn + 5].Style.Numberformat.Format = "0.0";
             string yearFormat = GetYearFormat(MortalityEvolution.TimeMode);
             if (!string.IsNullOrEmpty(yearFormat))
-                workSheet.Cells[3, 1, workSheet.Dimension.End.Row, 2].Style.Numberformat.Format = yearFormat;
-            workSheet.Cells[3, 6].Value = "Excess %";
-            workSheet.Cells[3, 6, workSheet.Dimension.End.Row, 6].Style.Numberformat.Format = "0.0%";
+                workSheet.Cells[3, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 2].Style.Numberformat.Format = yearFormat;
+            workSheet.Cells[3, _DataColumn + 6].Value = "Excess %";
+            workSheet.Cells[3, _DataColumn + 6, workSheet.Dimension.End.Row, _DataColumn + 6].Style.Numberformat.Format = "0.0%";
         }
-
+        const int _ChartsColumn = 0;
+        const int _ChartsOffset = 25;
         private void BuildEvolutionChart(ExcelWorksheet workSheet)
         {
             ExcelChart evolutionChart = workSheet.Drawings.AddChart("chart", eChartType.ColumnClustered);
-            var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[3, 2, workSheet.Dimension.End.Row, 2], workSheet.Cells[3, 1, workSheet.Dimension.End.Row, 1]);
+            int startDataRow = 3;
+            int endDataRow = workSheet.Dimension.End.Row;
+            var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[startDataRow, _DataColumn + 2, endDataRow, _DataColumn + 2], workSheet.Cells[3, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 1]);
             standardizedDeathsSerie.Header = "Standardized deaths";
             if (MortalityEvolution.DisplayRawDeaths)
             {
-                var rawDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[3, 3, workSheet.Dimension.End.Row, 3], workSheet.Cells[3, 1, workSheet.Dimension.End.Row, 1]);
+                var rawDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[startDataRow, _DataColumn + 3, endDataRow, _DataColumn + 3], workSheet.Cells[3, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 1]);
                 rawDeathsSerie.Header = "Raw deaths";
             }
-            var baselineSerie = evolutionChart.Series.Add(workSheet.Cells[3, 4, workSheet.Dimension.End.Row, 4], workSheet.Cells[3, 1, workSheet.Dimension.End.Row, 1]);
+            var baselineSerie = evolutionChart.Series.Add(workSheet.Cells[startDataRow, _DataColumn + 4, endDataRow, _DataColumn + 4], workSheet.Cells[3, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 1]);
             baselineSerie.Header = "Baseline";
-            evolutionChart.SetPosition(2, 0, 7, 0);
+            evolutionChart.SetPosition(2, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
+            evolutionChart.Title.Text = $"Mortality by {MortalityEvolution.TimeMode}";
         }
         private void BuildExcessEvolutionChart(ExcelWorksheet workSheet, int iLastRow)
         {
             ExcelChart evolutionChart = workSheet.Drawings.AddChart("ExcessEvolutionChart", eChartType.ColumnClustered);
-            var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[3, 5, iLastRow, 5], workSheet.Cells[3, 1, iLastRow, 1]);
+            var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[3, _DataColumn + 5, iLastRow, _DataColumn + 5], workSheet.Cells[3, _DataColumn + 1, iLastRow, _DataColumn + 1]);
             standardizedDeathsSerie.Header = "Excess deaths";
-            evolutionChart.SetPosition(workSheet.Dimension.End.Row + 10, 0, 7, 0);
+            evolutionChart.SetPosition(60, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
+            evolutionChart.Title.Text = $"Excess mortality by {MortalityEvolution.TimeMode}";
         }
         private void BuildExcessPercentEvolutionChart(ExcelWorksheet workSheet, int iLastRow)
         {
             ExcelChart evolutionChart = workSheet.Drawings.AddChart("ExcessPercentEvolutionChart", eChartType.ColumnClustered);
-            var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[3, 6, iLastRow, 6], workSheet.Cells[3, 1, iLastRow, 1]);
+            var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[3, _DataColumn + 6, iLastRow, _DataColumn + 6], workSheet.Cells[3, _DataColumn + 1, iLastRow, _DataColumn + 1]);
             standardizedDeathsSerie.Header = "Excess deaths (%)";
-            evolutionChart.SetPosition(workSheet.Dimension.End.Row + 40, 0, 7, 0);
+            evolutionChart.SetPosition(90, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
+            evolutionChart.Title.Text = $"Relative excess mortality (%) by {MortalityEvolution.TimeMode}";
         }
 
         private void BuildHeader(ExcelWorksheet workSheet)
@@ -127,31 +134,31 @@ namespace MortalityAnalyzer.Views
             int iStartRow = workSheet.Dimension.End.Row + 4;
             if (iStartRow < 30)
                 iStartRow = 30;
-            workSheet.Cells[iStartRow, 1].LoadFromDataTable(MortalityEvolution.ExcessHistogram, true);
-            workSheet.Cells[iStartRow, 3, workSheet.Dimension.End.Row, 3].Style.Numberformat.Format = "0.0";
-            ExcelRange rangeExcess = workSheet.Cells[iStartRow, 1, workSheet.Dimension.End.Row, 3];
+            workSheet.Cells[iStartRow, _DataColumn + 1].LoadFromDataTable(MortalityEvolution.ExcessHistogram, true);
+            workSheet.Cells[iStartRow, _DataColumn + 3, workSheet.Dimension.End.Row, _DataColumn + 3].Style.Numberformat.Format = "0.0";
+            ExcelRange rangeExcess = workSheet.Cells[iStartRow, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 3];
             ExcelTable tabExcess = workSheet.Tables.Add(rangeExcess, $"ExcessTable{BaseName}");
             tabExcess.TableStyle = TableStyles.Medium9;
             ExcelChart chart = workSheet.Drawings.AddChart("ExcessChart", eChartType.ColumnClustered);
-            var excessSerie = chart.Series.Add(workSheet.Cells[iStartRow, 2, workSheet.Dimension.End.Row, 2], workSheet.Cells[iStartRow, 1, workSheet.Dimension.End.Row, 1]);
-            var normalSerie = chart.Series.Add(workSheet.Cells[iStartRow, 3, workSheet.Dimension.End.Row, 3], workSheet.Cells[iStartRow, 1, workSheet.Dimension.End.Row, 1]);
-            const int iStartColumn = 7;
-            chart.SetPosition(iStartRow + 1, 0, iStartColumn, 0);
+            var excessSerie = chart.Series.Add(workSheet.Cells[iStartRow, _DataColumn + 2, workSheet.Dimension.End.Row, _DataColumn + 2], workSheet.Cells[iStartRow, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 1]);
+            var normalSerie = chart.Series.Add(workSheet.Cells[iStartRow, _DataColumn + 3, workSheet.Dimension.End.Row, _DataColumn + 3], workSheet.Cells[iStartRow, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 1]);
+            int iStartColumn = _ChartsColumn;
+            chart.SetPosition(30, 0, iStartColumn, _ChartsOffset);
             chart.SetSize(900, 500);
             chart.Title.Text = "Death excess distribution";
 
-            int iRow = iStartRow;
-            workSheet.Column(iStartColumn + 1).Width = 20;
-            workSheet.Cells[iRow, iStartColumn + 1].Value = "Standard deviation:";
-            ExcelStyle varianceCellstyle = workSheet.Cells[iRow, iStartColumn + 1].Style;
+            int iRow = workSheet.Dimension.End.Row + 4;
+            workSheet.Column(_DataColumn + 1).Width = 20;
+            workSheet.Cells[iRow, _DataColumn + 1].Value = "Standard deviation:";
+            ExcelStyle varianceCellstyle = workSheet.Cells[iRow, _DataColumn + 1].Style;
             varianceCellstyle.Border.BorderAround(ExcelBorderStyle.Thin);
             varianceCellstyle.Fill.PatternType = ExcelFillStyle.Solid;
             varianceCellstyle.Fill.BackgroundColor.SetColor(Color.Gray);
             varianceCellstyle.Font.Color.SetColor(Color.White);
             varianceCellstyle.Font.Bold = true;
-            workSheet.Cells[iRow, iStartColumn + 2].Value = MortalityEvolution.StandardDeviation;
-            workSheet.Cells[iRow, iStartColumn + 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-            workSheet.Cells[iRow, iStartColumn + 2].Style.Numberformat.Format = "0.0";
+            workSheet.Cells[iRow, _DataColumn + 2].Value = MortalityEvolution.StandardDeviation;
+            workSheet.Cells[iRow, _DataColumn + 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+            workSheet.Cells[iRow, _DataColumn + 2].Style.Numberformat.Format = "0.0";
         }
 
         private string GetSheetName()
