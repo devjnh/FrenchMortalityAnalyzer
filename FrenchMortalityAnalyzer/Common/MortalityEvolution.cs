@@ -4,6 +4,7 @@ using MortalityAnalyzer.Model;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,7 +33,11 @@ namespace MortalityAnalyzer
         internal DatabaseEngine DatabaseEngine { get; set; }
         public DataTable DataTable { get; private set; }
         public bool WholePeriods => TimeMode != TimeMode.YearToDate;
-        
+        [Option('i', "Injections", Required = false, HelpText = "Display Covid 19 vaccine injections")]
+        public VaxDose Injections { get; set; }
+        public bool DisplayInjections => Injections != VaxDose.None;
+
+
         public virtual void Generate()
         {
             if (WholePeriods)
@@ -67,8 +72,36 @@ namespace MortalityAnalyzer
             CleanDataTable();
             Projection.BuildProjection(DataTable, MinYearRegression, MaxYearRegression, PeriodsInYear);
             BuildExcessHistogram();
+            if (DisplayInjections)
+                BuildVaccinationStatistics();
         }
 
+        private const string Query_Vaccination = @"SELECT {1}, SUM({2}) AS Injections FROM VaxStatistics{0}
+GROUP BY {1}
+ORDER BY {1}";
+        void BuildVaccinationStatistics()
+        {
+            StringBuilder conditionBuilder = new StringBuilder();
+            AddConditions(conditionBuilder);
+            string countryCondition = GetCountryCondition();
+            if (!string.IsNullOrWhiteSpace(countryCondition))
+                AddCondition(countryCondition, conditionBuilder);
+            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", GetTimeGroupingField(TimeMode), Injections);
+            DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
+            vaccinationStatistics.PrimaryKey = new DataColumn[] { vaccinationStatistics.Columns[0] };
+            DataTable.PrimaryKey = new DataColumn[] { DataTable.Columns[0] };
+            DataColumn injectionsColumn = DataTable.Columns.Add("Injections", typeof(int));
+            foreach (DataRow dataRow in DataTable.Rows)
+                dataRow[injectionsColumn] = 0;
+            if (WholePeriods)
+                vaccinationStatistics.Rows.Remove(vaccinationStatistics.Rows[vaccinationStatistics.Rows.Count - 1]);
+            foreach (DataRow dataRow in vaccinationStatistics.Rows)
+            {
+                string filter = $"{GetTimeGroupingField(TimeMode)}={((double)dataRow[0]).ToString(CultureInfo.InvariantCulture)}";
+                DataRow[] rows = DataTable.Select(filter);
+                rows[0][injectionsColumn] = dataRow[1];
+            }
+        }
         private int PeriodsInYear
         {
             get
@@ -251,4 +284,5 @@ namespace MortalityAnalyzer
        
     }
     public enum TimeMode { Year, DeltaYear, Semester, Quarter, YearToDate }
+    public enum VaxDose { None, FirstDose, SecondDose, ThirdDose, All}
 }
