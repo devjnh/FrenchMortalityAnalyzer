@@ -31,7 +31,7 @@ namespace MortalityAnalyzer
         public int ToDateDelay { get; set; } = 30;
         public DateTime LastDay { get; private set; } = DateTime.MaxValue;
         internal DatabaseEngine DatabaseEngine { get; set; }
-        public DataTable DataTable { get; private set; }
+        public DataTable DataTable { get; protected set; }
         public bool WholePeriods => TimeMode != TimeMode.YearToDate;
         [Option('i', "Injections", Required = false, HelpText = "Display Covid 19 vaccine injections")]
         public VaxDose Injections { get; set; }
@@ -112,8 +112,11 @@ ORDER BY {1}";
                         return 4;
                     case TimeMode.Semester:
                         return 2;
-                    default:
+                    case TimeMode.Year:
+                    case TimeMode.YearToDate:
                         return 1;
+                    default:
+                        throw new ArgumentOutOfRangeException($"The time mode {TimeMode} is  not supported!");
                 }
             }
         }
@@ -187,7 +190,9 @@ ORDER BY {1}";
                 case TimeMode.DeltaYear: return nameof(DeathStatistic.DeltaYear);
                 case TimeMode.Semester: return nameof(DeathStatistic.Semester);
                 case TimeMode.Quarter: return nameof(DeathStatistic.Quarter);
-                default: return nameof(DeathStatistic.Year);
+                case TimeMode.YearToDate:
+                case TimeMode.Year: return nameof(DeathStatistic.Year);
+                default: throw new ArgumentOutOfRangeException($"The time mode {TimeMode} is  not supported!");
             }
         }
 
@@ -283,6 +288,6 @@ ORDER BY {1}";
         public SpecificImplementation Implementation => _Implementation;
        
     }
-    public enum TimeMode { Year, DeltaYear, Semester, Quarter, YearToDate }
+    public enum TimeMode { Year, DeltaYear, Semester, Quarter, YearToDate, Week, Day }
     public enum VaxDose { None, FirstDose, SecondDose, ThirdDose, All}
 }

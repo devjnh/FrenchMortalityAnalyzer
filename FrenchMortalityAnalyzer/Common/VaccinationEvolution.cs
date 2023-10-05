@@ -12,16 +12,30 @@ namespace MortalityAnalyzer
 {
     public class VaccinationEvolution : MortalityEvolution
     {
-        [Option("SlidingWeeks", Required = false, HelpText = "12 sliding weeks by default")]
-        public int Weeks { get; set; } = 12;
-        public string TimeField { get; set; } = "Week";
+        [Option("RollingPeriod", Required = false, HelpText = "12 rolling weeks by default")]
+        public int RollingPeriod { get; set; } = 12;
+        public string TimeField
+        {
+            get
+            {
+                switch (TimeMode)
+                {
+                    case TimeMode.Week: return "Week";
+                    case TimeMode.Day: return "Date";
+                    default: throw new ArgumentOutOfRangeException($"The time mode {TimeMode} is  not supported!");
+                }
+            }
+        }
 
-        public DataTable SlidingWeeks { get; private set; }
+        public VaccinationEvolution()
+        {
+            TimeMode = TimeMode.Week;
+        }
         public override void Generate()
         {
-            BuildWeeklyVaccinationStatistics();
+            BuildMovingAverageStatistics();
         }
-        void BuildWeeklyVaccinationStatistics()
+        void BuildMovingAverageStatistics()
         {
             string countryCondition = GetCountryCondition();
             AdjustMinYearRegression(countryCondition);
@@ -54,22 +68,22 @@ namespace MortalityAnalyzer
                     rows[0][injectionsColumn] = dataRow[1];
             }
 
-            SlidingWeeks = new DataTable();
-            SlidingWeeks.Columns.Add(TimeField, typeof(DateTime));
-            SlidingWeeks.Columns.Add("Deaths", typeof(double));
-            SlidingWeeks.Columns.Add("Injections", typeof(double));
-            WindowFilter deathsFilter = new WindowFilter(Weeks);
-            WindowFilter injectionsFilter = new WindowFilter(Weeks);
+            DataTable = new DataTable();
+            DataTable.Columns.Add(TimeField, typeof(DateTime));
+            DataTable.Columns.Add("Deaths", typeof(double));
+            DataTable.Columns.Add("Injections", typeof(double));
+            WindowFilter deathsFilter = new WindowFilter(RollingPeriod);
+            WindowFilter injectionsFilter = new WindowFilter(RollingPeriod);
             foreach (DataRow dataRow in deathStatistics.Rows)
             {
                 double deaths = deathsFilter.Filter((double)dataRow[1]);
                 double injections = injectionsFilter.Filter(Convert.ToDouble(dataRow[3]));
                 if (!deathsFilter.IsBufferFull)
                     continue;
-                SlidingWeeks.Rows.Add(new object[] { dataRow[0], deaths, injections });
+                DataTable.Rows.Add(new object[] { dataRow[0], deaths, injections });
 
             }
-            Projection.BuildProjection(SlidingWeeks, new DateTime(MinYearRegression, 1, 1), new DateTime(MaxYearRegression, 1, 1), 1);
+            Projection.BuildProjection(DataTable, new DateTime(MinYearRegression, 1, 1), new DateTime(MaxYearRegression, 1, 1), 1);
         }
     }
 }

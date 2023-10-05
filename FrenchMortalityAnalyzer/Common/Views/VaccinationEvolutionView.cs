@@ -16,12 +16,12 @@ namespace MortalityAnalyzer.Views
     {
         public string MinAgeText => MortalityEvolution.MinAge >= 0 ? MortalityEvolution.MinAge.ToString() : string.Empty;
         public string MaxAgeText => MortalityEvolution.MaxAge >= 0 ? MortalityEvolution.MaxAge.ToString() : string.Empty;
-        private string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeField}{MortalityEvolution.Weeks}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}";
+        private string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeField}{MortalityEvolution.RollingPeriod}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}";
         public VaccinationEvolution MortalityEvolution { get; set; }
-        private string TimeModeText => $"{MortalityEvolution.Weeks} weeks";
+        private string TimeModeText => $"{MortalityEvolution.RollingPeriod} rolling {MortalityEvolution.TimeMode}";
         private string GetSheetName()
         {
-            return $"{MortalityEvolution.GetCountryDisplayName()} By {TimeModeText}{AgeRange}{GenderModeText}";
+            return $"{MortalityEvolution.GetCountryDisplayName()} {TimeModeText}{AgeRange}{GenderModeText}";
         }
         public string GenderModeText => MortalityEvolution.GenderMode == GenderFilter.All ? "" : $" {MortalityEvolution.GenderMode}";
         private string AgeRange
@@ -62,7 +62,7 @@ namespace MortalityAnalyzer.Views
         private void BuildWeeklyEvolutionTable(ExcelWorksheet workSheet)
         {
             _iStartWeekly = 3;
-            workSheet.Cells[_iStartWeekly, 1].LoadFromDataTable(MortalityEvolution.SlidingWeeks, true);
+            workSheet.Cells[_iStartWeekly, 1].LoadFromDataTable(MortalityEvolution.DataTable, true);
             workSheet.Cells[_iStartWeekly, 1].Value = "Week";
             workSheet.Column(2).AutoFit();
             //create a range for the table
