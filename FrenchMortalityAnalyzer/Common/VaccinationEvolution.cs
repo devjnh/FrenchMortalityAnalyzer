@@ -83,7 +83,7 @@ namespace MortalityAnalyzer
                 DataTable.Rows.Add(new object[] { dataRow[0], deaths, injections });
 
             }
-            Projection.BuildProjection(DataTable, new DateTime(MinYearRegression, 1, 1), new DateTime(MaxYearRegression, 1, 1), 1);
+            Projection.BuildProjection(DataTable, new DateTime(MinYearRegression, 1, 1), new DateTime(MaxYearRegression, 1, 1), 12);
         }
     }
 }

@@ -97,7 +97,7 @@ namespace MortalityAnalyzer.Common
                 DateTime dateTime = (DateTime)value;
                 DateTime year = new DateTime(dateTime.Year, 1, 1);
                 int totalDays = (int)(year.AddYears(1) - year).TotalDays;
-                int fraction = (int)((dateTime.DayOfYear - 1) / totalDays * yearFractions);
+                int fraction = (int)((double)(dateTime.DayOfYear - 1) / totalDays * yearFractions);
                 if (fraction >= yearFractions)
                     throw new Exception("Invalid fraction");
                 return fraction;
