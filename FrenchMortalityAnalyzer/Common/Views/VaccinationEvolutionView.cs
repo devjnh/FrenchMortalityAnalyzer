@@ -82,10 +82,12 @@ namespace MortalityAnalyzer.Views
         private void BuildWeeklyEvolutionChart(ExcelWorksheet workSheet, int iLastRow, int offset = 0, int startChartRow = 0)
         {
             ExcelChart evolutionChart = workSheet.Drawings.AddChart($"WeeklyExcessEvolutionChart{offset}", eChartType.Area);
-            var excessDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[_iStartWeekly+1+offset, 6, iLastRow, 6], workSheet.Cells[_iStartWeekly+1+offset, 1, iLastRow, 1]);
+            int iFirstRow = _iStartWeekly + 1 + offset;
+            ExcelRange timeSerie = workSheet.Cells[iFirstRow, 1, iLastRow, 1];
+            var excessDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[iFirstRow, 6, iLastRow, 6], timeSerie);
             excessDeathsSerie.Header = "Excess deaths (%)";
             var vaxChart = evolutionChart.PlotArea.ChartTypes.Add(eChartType.Line);
-            var vaccinationSerie = vaxChart.Series.Add(workSheet.Cells[_iStartWeekly + 1 + offset, 3, workSheet.Dimension.End.Row, 3], workSheet.Cells[_iStartWeekly + 1 + offset, 1, workSheet.Dimension.End.Row, 1]);
+            var vaccinationSerie = vaxChart.Series.Add(workSheet.Cells[iFirstRow, 3, iLastRow, 3], timeSerie);
             vaccinationSerie.Header = $"{MortalityEvolution.Injections} injections";
             vaxChart.XAxis.Crosses = eCrosses.Min;
             evolutionChart.UseSecondaryAxis = true;
