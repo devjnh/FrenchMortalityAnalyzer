@@ -93,6 +93,8 @@ ORDER BY {1}";
             DataColumn injectionsColumn = DataTable.Columns.Add("Injections", typeof(int));
             foreach (DataRow dataRow in DataTable.Rows)
                 dataRow[injectionsColumn] = 0;
+            if (vaccinationStatistics.Rows.Count == 0)
+                return;
             if (WholePeriods)
                 vaccinationStatistics.Rows.Remove(vaccinationStatistics.Rows[vaccinationStatistics.Rows.Count - 1]);
             foreach (DataRow dataRow in vaccinationStatistics.Rows)
