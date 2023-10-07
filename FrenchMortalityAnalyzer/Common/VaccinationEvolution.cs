@@ -56,7 +56,8 @@ namespace MortalityAnalyzer
                 dataRow[injectionsColumn] = 0;
             if (WholePeriods)
             {
-                vaccinationStatistics.Rows.Remove(vaccinationStatistics.Rows[vaccinationStatistics.Rows.Count - 1]);
+                if (vaccinationStatistics.Rows.Count > 0)
+                    vaccinationStatistics.Rows.Remove(vaccinationStatistics.Rows[vaccinationStatistics.Rows.Count - 1]);
                 deathStatistics.Rows.Remove(deathStatistics.Rows[deathStatistics.Rows.Count - 1]);
             }
             Implementation.CleanDataTable(deathStatistics);
