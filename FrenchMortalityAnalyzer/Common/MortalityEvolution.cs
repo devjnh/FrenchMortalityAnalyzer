@@ -97,7 +97,7 @@ ORDER BY {1}";
                 vaccinationStatistics.Rows.Remove(vaccinationStatistics.Rows[vaccinationStatistics.Rows.Count - 1]);
             foreach (DataRow dataRow in vaccinationStatistics.Rows)
             {
-                string filter = $"{GetTimeGroupingField(TimeMode)}={((double)dataRow[0]).ToString(CultureInfo.InvariantCulture)}";
+                string filter = $"{GetTimeGroupingField(TimeMode)}={(Convert.ToDouble(dataRow[0])).ToString(CultureInfo.InvariantCulture)}";
                 DataRow[] rows = DataTable.Select(filter);
                 rows[0][injectionsColumn] = dataRow[1];
             }
