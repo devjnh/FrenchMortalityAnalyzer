@@ -115,6 +115,7 @@ ORDER BY {1}";
                     case TimeMode.Semester:
                         return 2;
                     case TimeMode.Year:
+                    case TimeMode.DeltaYear:
                     case TimeMode.YearToDate:
                         return 1;
                     default:
