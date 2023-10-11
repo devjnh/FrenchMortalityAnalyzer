@@ -44,7 +44,7 @@ namespace MortalityAnalyzer
             AddCondition($"Year >= {MinYearRegression}", conditionBuilder);
             if (!string.IsNullOrWhiteSpace(countryCondition))
                 AddCondition(countryCondition, conditionBuilder);
-            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, Injections);
+            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, InjectionsField);
             DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
             query = string.Format(GetQueryTemplate(), conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, "");
             DataTable deathStatistics = DatabaseEngine.GetDataTable(query);

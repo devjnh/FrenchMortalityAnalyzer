@@ -86,7 +86,7 @@ ORDER BY {1}";
             string countryCondition = GetCountryCondition();
             if (!string.IsNullOrWhiteSpace(countryCondition))
                 AddCondition(countryCondition, conditionBuilder);
-            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", GetTimeGroupingField(TimeMode), Injections);
+            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", GetTimeGroupingField(TimeMode), InjectionsField);
             DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
             vaccinationStatistics.PrimaryKey = new DataColumn[] { vaccinationStatistics.Columns[0] };
             DataTable.PrimaryKey = new DataColumn[] { DataTable.Columns[0] };
@@ -104,6 +104,9 @@ ORDER BY {1}";
                 rows[0][injectionsColumn] = dataRow[1];
             }
         }
+
+        protected string InjectionsField => Injections == VaxDose.All ? $"{VaxDose.FirstDose} + {VaxDose.SecondDose} + {VaxDose.ThirdDose}" : Injections.ToString();
+
         private int PeriodsInYear
         {
             get
