@@ -121,6 +121,10 @@ namespace MortalityAnalyzer.Views
                 vaccinationSerie.Header = $"{MortalityEvolution.Injections} injections";
                 vaxChart.XAxis.Crosses = eCrosses.Min;
                 evolutionChart.UseSecondaryAxis = true;
+                evolutionChart.YAxis.MinValue = MortalityEvolution.MinExcess;
+                evolutionChart.YAxis.MaxValue = MortalityEvolution.MaxExcess;
+                vaxChart.YAxis.MinValue = MortalityEvolution.MaxInjections * MortalityEvolution.MinExcess / MortalityEvolution.MaxExcess * 1.4;
+                vaxChart.YAxis.MaxValue = MortalityEvolution.MaxInjections * 1.4;
             }
             evolutionChart.SetPosition(3 + startChartRow, 0, 7, 0);
             evolutionChart.SetSize(900, 500);

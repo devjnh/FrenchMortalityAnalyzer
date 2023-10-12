@@ -105,6 +105,10 @@ ORDER BY {1}";
             }
         }
 
+        public double MaxExcess { get; protected set; }
+        public double MinExcess { get; protected set; }
+        public double MaxInjections { get; protected set; } = 0;
+
         protected string InjectionsField => Injections == VaxDose.All ? $"{VaxDose.FirstDose} + {VaxDose.SecondDose} + {VaxDose.ThirdDose}" : Injections.ToString();
 
         private int PeriodsInYear
@@ -292,7 +296,7 @@ ORDER BY {1}";
         public virtual string GetCountryInternalName() => _Implementation.GetCountryInternalName();
         protected SpecificImplementation _Implementation;
         public SpecificImplementation Implementation => _Implementation;
-       
+
     }
     public enum TimeMode { Year, DeltaYear, Semester, Quarter, YearToDate, Week, Day }
     public enum VaxDose { None, FirstDose, SecondDose, ThirdDose, All}
