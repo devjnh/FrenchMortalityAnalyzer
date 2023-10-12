@@ -14,6 +14,11 @@ namespace MortalityAnalyzer
     {
         [Option("RollingPeriod", Required = false, HelpText = "12 rolling weeks by default")]
         public int RollingPeriod { get; set; } = 12;
+        [Option("ZoomMinDate", Required = false, HelpText = "Time zoom min date 2020-01-01 by default")]
+        public DateTime ZoomMinDate { get; set; } = new DateTime(2020, 1, 1);
+        [Option("ZoomMaxDate", Required = false, HelpText = "Time zoom max date 2022-07-01 by default")]
+        public DateTime ZoomMaxDate { get; set; } = new DateTime(2022, 7, 1);
+
         public string TimeField
         {
             get

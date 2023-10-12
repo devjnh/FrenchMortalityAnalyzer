@@ -56,8 +56,8 @@ namespace MortalityAnalyzer.Views
             BuildWeeklyEvolutionTable(workSheet);
             BuildEvolutionChart(workSheet, _iStartWeekly + 1, workSheet.Dimension.End.Row);
             BuildExcessEvolutionChart(workSheet, _iStartWeekly + 1, workSheet.Dimension.End.Row, 30);
-            DateTime minZoomDate = new DateTime(2020, 1, 1);
-            DateTime maxZoomDate = new DateTime(2022, 7, 1);
+            DateTime minZoomDate = MortalityEvolution.ZoomMinDate;
+            DateTime maxZoomDate = MortalityEvolution.ZoomMaxDate;
             int iZoomMin = _iStartWeekly + 1;
             int iZoomMax = workSheet.Dimension.End.Row;
             for (int i = 0; i < MortalityEvolution.DataTable.Rows.Count; i++)
