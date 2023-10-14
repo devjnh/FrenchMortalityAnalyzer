@@ -26,7 +26,7 @@ ORDER BY {1}";
         public override string GetCountryInternalName() => Country;
         public override string GetPopulationSqlQuery()
         {
-            return $"SELECT SUM(Population) FROM AgeStructure WHERE Year = {AgeStructure.ReferenceYear}";
+            return $"SELECT SUM(Population) FROM AgeStructure WHERE Year = {AgeStructure.ReferenceYear} AND Gender = {(int)MortalityEvolution.GenderMode}";
         }
         public override string GetCountryCondition() => String.Empty;
     }

@@ -284,7 +284,8 @@ namespace MortalityAnalyzer
                 DataColumn column = new DataColumn();
                 column.ColumnName = property.Name;
                 Type underlyingType = Nullable.GetUnderlyingType(property.PropertyType);
-                column.DataType = underlyingType ?? property.PropertyType;
+                Type dataType = underlyingType ?? property.PropertyType;
+                column.DataType = dataType.IsEnum ? typeof(int) : dataType;
                 dataTable.Columns.Add(column);
             }
         }
@@ -294,7 +295,10 @@ namespace MortalityAnalyzer
             DataRow dataRow = dataTable.NewRow();
 
             foreach (PropertyInfo property in row.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
-                dataRow[property.Name] = property.GetValue(row) ?? DBNull.Value;
+            {
+                object value = property.GetValue(row);
+                dataRow[property.Name] = value is Enum ? (int)value : value ?? DBNull.Value;
+            }
 
             return dataRow;
         }

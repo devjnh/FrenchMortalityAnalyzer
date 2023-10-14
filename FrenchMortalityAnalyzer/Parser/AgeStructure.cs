@@ -1,4 +1,5 @@
 ﻿using MortalityAnalyzer;
+using MortalityAnalyzer.Common.Model;
 using MortalityAnalyzer.Model;
 using OfficeOpenXml;
 using System;
@@ -21,23 +22,25 @@ namespace MortalityAnalyzer
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         }
-        public AgeStructure()
+        protected DataTable CreateDataTable()
         {
-            DataTable.Columns.Add("Year", typeof(int));
-            DataTable.Columns.Add("Age", typeof(int));
-            DataTable.Columns.Add("Population", typeof(int));
-            DataTable.Columns.Add("Males", typeof(int));
-            DataTable.Columns.Add("Females", typeof(int));
-            DataTable.PrimaryKey = new DataColumn[] { DataTable.Columns[0], DataTable.Columns[1] };
+            DataTable dataTable = DatabaseEngine.CreateDataTable(typeof(AgeStatistic), "AgeStructure");
+            dataTable.PrimaryKey = new DataColumn[] { dataTable.Columns[nameof(AgeStatistic.Year)], dataTable.Columns[nameof(AgeStatistic.Age)], dataTable.Columns[nameof(AgeStatistic.Gender)], dataTable.Columns[nameof(AgeStatistic.Country)] };
+            return dataTable;
+        }
+        private void LoadAgeStructure()
+        {
+            DataTable = CreateDataTable();
+            Console.WriteLine($"Loading age structure");
+            DatabaseEngine.FillDataTable("SELECT Year, Age, Population, Gender, Country FROM AgeStructure ORDER BY Year, Age", DataTable);
+            Console.WriteLine($"Age structure loaded");
         }
 
         public void Load(string baseFolder)
         {
-            Console.WriteLine($"Loading age structure");
             try
             {
-                DatabaseEngine.FillDataTable("SELECT Year, Age, Population, Males, Females FROM AgeStructure ORDER BY Year, Age", DataTable);
-                Console.WriteLine($"Age structure loaded");
+                LoadAgeStructure();
                 return;
             }
             catch { }
@@ -95,17 +98,21 @@ namespace MortalityAnalyzer
 
                 if (age < MaxAge || isLastRow)
                 {
-                    DataRow row = DataTable.NewRow();
-                    row[0] = year;
-                    row[1] = isLastRow ? MaxAge : age;
-                    row[2] = total;
-                    row[3] = males;
-                    row[4] = females;
-                    DataTable.Rows.Add(row);
+                    AgeStatistic ageStatistic = new AgeStatistic { Age = isLastRow ? MaxAge : age, Year = year, Country = "FR" };
+                    AddRow(ageStatistic, GenderFilter.All, total);
+                    AddRow(ageStatistic, GenderFilter.Male, males);
+                    AddRow(ageStatistic, GenderFilter.Female, females);
                 }
                 if (isLastRow)
                     break;  // Last row age > 100 or age > 105
             }
+        }
+
+        private void AddRow(AgeStatistic ageStatistic, GenderFilter gender, int population)
+        {
+            ageStatistic.Gender = gender;
+            ageStatistic.Population = population;
+            DataTable.Rows.Add(DatabaseEngine.ToDataRow(DataTable, ageStatistic));
         }
 
         private void GetPopulation(ExcelWorksheet yearSheet, int iRow, int age, int populationColumn, ref int population)
@@ -119,11 +126,8 @@ namespace MortalityAnalyzer
 
         public int GetPopulation(int year, int age, GenderFilter genderFilter = GenderFilter.All)
         {
-            int ageLowerBound = age <= MaxAge ? age : MaxAge;
-            DataRow[] rows = DataTable.Select($"Year={year} AND Age={ageLowerBound}");
-            int population;
-            population = rows.Length == 1 ? (int)rows[0][2 + (int)genderFilter] : -1;
-            return population;
+            DataRow[] rows = DataTable.Select($"Year={year} AND Age={age} AND Gender={(int)genderFilter}");
+            return rows.Length == 1 ? (int)rows[0][nameof(AgeStatistic.Population)] : -1;
         }
     }
 }

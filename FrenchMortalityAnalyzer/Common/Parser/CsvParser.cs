@@ -33,7 +33,7 @@ namespace MortalityAnalyzer.Parser
                     while (!textReader.EndOfStream)
                     {
                         line = textReader.ReadLine();
-                        IEntry entry = GetEntry(line.Split(Separator));
+                        object entry = GetEntry(line.Split(Separator));
                         if (entry != null)
                             DatabaseEngine.Insert(entry);
                     }
@@ -55,7 +55,7 @@ namespace MortalityAnalyzer.Parser
                 return 0;
         }
         protected abstract DataTable CreateDataTable();
-        protected abstract IEntry GetEntry(string[] split);
+        protected abstract object GetEntry(string[] split);
         public static DateTime FirstDateOfWeekISO8601(int year, int weekOfYear)
         {
             DateTime jan1 = new DateTime(year, 1, 1);

@@ -33,7 +33,7 @@ namespace MortalityAnalyzer.Parser
             return DatabaseEngine.CreateDataTable(typeof(VaxStatistic));
         }
 
-        protected override IEntry GetEntry(string[] split)
+        protected override object GetEntry(string[] split)
         {
             VaxStatistic vaxStatistic = new VaxStatistic();
             vaxStatistic.Date = Convert.ToDateTime(GetValue("jour", split));
