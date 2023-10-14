@@ -109,7 +109,7 @@ ORDER BY {1}";
         public double MinExcess { get; protected set; }
         public double MaxInjections { get; protected set; } = 0;
 
-        protected string InjectionsField => Injections == VaxDose.All ? $"{VaxDose.FirstDose} + {VaxDose.SecondDose} + {VaxDose.ThirdDose}" : Injections.ToString();
+        protected string InjectionsField => Injections == VaxDose.All ? $"{VaxDose.D1} + {VaxDose.D2} + {VaxDose.D3}" : Injections.ToString();
 
         private int PeriodsInYear
         {
@@ -299,5 +299,5 @@ ORDER BY {1}";
 
     }
     public enum TimeMode { Year, DeltaYear, Semester, Quarter, YearToDate, Week, Day }
-    public enum VaxDose { None, FirstDose, SecondDose, ThirdDose, All}
+    public enum VaxDose { None, D1, D2, D3, All}
 }

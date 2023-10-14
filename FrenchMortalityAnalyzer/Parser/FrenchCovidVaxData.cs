@@ -38,9 +38,9 @@ namespace MortalityAnalyzer.Parser
             VaxStatistic vaxStatistic = new VaxStatistic();
             vaxStatistic.Date = Convert.ToDateTime(GetValue("jour", split));
             vaxStatistic.Country = GetValue("fra", split);
-            vaxStatistic.FirstDose = GetIntValue("n_dose1", split);
-            vaxStatistic.SecondDose = GetIntValue("n_complet", split);
-            vaxStatistic.ThirdDose = GetIntValue("n_rappel", split);
+            vaxStatistic.D1 = GetIntValue("n_dose1", split);
+            vaxStatistic.D2 = GetIntValue("n_complet", split);
+            vaxStatistic.D3 = GetIntValue("n_rappel", split);
             int ageGroup = GetIntValue("clage_vacsi", split);
             if (ageGroup == 0)
                 return null;
