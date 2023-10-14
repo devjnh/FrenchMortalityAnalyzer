@@ -17,7 +17,7 @@ namespace MortalityAnalyzer
             string doneFolder = Path.Combine(deathsLogFolder, "Done");
             if (!Directory.Exists(doneFolder))
                 Directory.CreateDirectory(doneFolder);
-            DatabaseEngine.Prepare(DeathEntry.CreateDataTable(), false);
+            DatabaseEngine.Prepare(DatabaseEngine.CreateDataTable(typeof(DeathEntry), "Deaths"), false);
             IEnumerable<DeathLogFile> logFiles = Directory.EnumerateFiles(deathsLogFolder, "*.txt").Select(f => new DeathLogFile(f)).Where(f => f.IsValid).OrderBy(f => f.StartDate);
             foreach (DeathLogFile item in logFiles)
             {

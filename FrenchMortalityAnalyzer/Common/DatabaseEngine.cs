@@ -6,6 +6,7 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -46,10 +47,9 @@ namespace MortalityAnalyzer
         private const int _BATCH_SIZE = 2000;
         private DataTable _DataTable;
 
-        public void Insert(IEntry entry)
+        public void Insert(object entry)
         {
-            DataRow dataRow = _DataTable.NewRow();
-            entry.ToRow(dataRow);
+            DataRow dataRow = ToDataRow(_DataTable, entry);
             _DataTable.Rows.Add(dataRow);
             if (_DataTable.Rows.Count > _BATCH_SIZE)
             {
@@ -256,6 +256,47 @@ namespace MortalityAnalyzer
                 return false;
             }
 
+        }
+
+        public bool DoesTableExist(Type type) => DoesTableExist(GetTableName(type));
+
+        public static DataTable CreateDataTable(Type type)
+        {
+            return CreateDataTable(type, GetTableName(type));
+        }
+
+        public static string GetTableName(Type type) => $"{type.Name}s";
+
+        public static DataTable CreateDataTable(Type type, string tableName)
+        {
+            DataTable dataTable = new DataTable { TableName = tableName };
+            AddFields(type, dataTable);
+
+            return dataTable;
+        }
+
+        private static void AddFields(Type type, DataTable dataTable)
+        {
+            if (type.BaseType != typeof(object))
+                AddFields(type.BaseType, dataTable);
+            foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+            {
+                DataColumn column = new DataColumn();
+                column.ColumnName = property.Name;
+                Type underlyingType = Nullable.GetUnderlyingType(property.PropertyType);
+                column.DataType = underlyingType ?? property.PropertyType;
+                dataTable.Columns.Add(column);
+            }
+        }
+
+        public static DataRow ToDataRow(DataTable dataTable, object row)
+        {
+            DataRow dataRow = dataTable.NewRow();
+
+            foreach (PropertyInfo property in row.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                dataRow[property.Name] = property.GetValue(row) ?? DBNull.Value;
+
+            return dataRow;
         }
     }
 }

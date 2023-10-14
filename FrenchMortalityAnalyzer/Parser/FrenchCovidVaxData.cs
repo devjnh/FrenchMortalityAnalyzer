@@ -30,7 +30,7 @@ namespace MortalityAnalyzer.Parser
 
         protected override DataTable CreateDataTable()
         {
-            return VaxStatistic.CreateDataTable();
+            return DatabaseEngine.CreateDataTable(typeof(VaxStatistic));
         }
 
         protected override IEntry GetEntry(string[] split)
@@ -88,6 +88,6 @@ namespace MortalityAnalyzer.Parser
             }
         }
 
-        public bool IsBuilt => DatabaseEngine.DoesTableExist(VaxStatistic.StatisticsTableName);
+        public bool IsBuilt => DatabaseEngine.DoesTableExist(typeof(VaxStatistic));
     }
 }

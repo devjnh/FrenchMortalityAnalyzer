@@ -27,7 +27,7 @@ namespace MortalityAnalyzer
         public void BuildStatistics(GenderFilter genderFilter)
         {
             Console.WriteLine($"Building death statistics. Gender: {genderFilter}");
-            DatabaseEngine.Prepare(DeathStatistic.CreateDataTable(genderFilter));
+            DatabaseEngine.Prepare(CreateDataTable(genderFilter));
             string sexFilter = string.Empty;
             if (genderFilter != GenderFilter.All)
                 sexFilter = $" AND Gender = {(int)genderFilter}";
@@ -54,6 +54,15 @@ namespace MortalityAnalyzer
             }
             DatabaseEngine.FinishInsertion();
         }
+
+        private static DataTable CreateDataTable(GenderFilter genderFilter)
+        {
+            string tableName = DatabaseEngine.GetTableName(typeof(DeathStatistic));
+            if (genderFilter != GenderFilter.All)
+                tableName = $"{tableName}_{genderFilter}";
+            return DatabaseEngine.CreateDataTable(typeof(DeathStatistic), tableName);
+        }
+
         public void BuildStatistics()
         {
             BuildStatistics(GenderFilter.All);
