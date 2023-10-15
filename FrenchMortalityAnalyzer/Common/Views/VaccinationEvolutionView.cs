@@ -95,25 +95,5 @@ namespace MortalityAnalyzer.Views
             evolutionChart.SetPosition(3 + startChartRow, 0, 7, 0);
             evolutionChart.SetSize(900, 500);
         }
-
-        private void AdjustMinMax(ExcelChart evolutionChart, ExcelChart vaxChart)
-        {
-            if (MortalityEvolution.MinExcess < 0)
-            {
-                double resolution = MortalityAnalyzer.MortalityEvolution.GetHistogramResolution(-MortalityEvolution.MinExcess, 20, true);
-                evolutionChart.YAxis.MinValue = Round(MortalityEvolution.MinExcess, resolution);
-                evolutionChart.YAxis.MaxValue = MortalityEvolution.MaxExcess;
-                double minInjections = MortalityEvolution.MaxInjections * evolutionChart.YAxis.MinValue.Value / MortalityEvolution.MaxExcess * 1.4;
-                double maxInjections = MortalityEvolution.MaxInjections * 1.4;
-                resolution = MortalityAnalyzer.MortalityEvolution.GetHistogramResolution(-minInjections, 20, true);
-                vaxChart.YAxis.MinValue = Round(minInjections, resolution);
-                vaxChart.YAxis.MaxValue = maxInjections;
-            }
-        }
-
-        double Round(double value, double resolution)
-        {
-            return Math.Round(value / resolution, MidpointRounding.AwayFromZero) * resolution;    
-        }
     }
 }

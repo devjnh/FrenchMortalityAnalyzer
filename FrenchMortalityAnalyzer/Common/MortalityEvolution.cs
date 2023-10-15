@@ -74,6 +74,7 @@ namespace MortalityAnalyzer
             BuildExcessHistogram();
             if (DisplayInjections)
                 BuildVaccinationStatistics();
+            MinMax();
         }
 
         protected const string Query_Vaccination = @"SELECT {1}, SUM({2}) AS Injections FROM VaxStatistics{0}
@@ -282,6 +283,15 @@ ORDER BY {1}";
                 ExcessHistogram.Rows.Add(dataRow);
             }
         }
+        protected void MinMax()
+        {
+            EnumerableRowCollection<double> values = DataTable.AsEnumerable().Select(r => r.Field<double>("RelativeExcess"));
+            MaxExcess = values.Max();
+            MinExcess = values.Min();
+            if (DisplayInjections)
+                MaxInjections = DataTable.AsEnumerable().Select(r => Convert.ToDouble(r.Field<object>("Injections"))).Max();
+        }
+
         protected virtual string GetQueryTemplate() => _Implementation.GetQueryTemplate();
 
         protected virtual void CleanDataTable() => _Implementation.CleanDataTable(DataTable);

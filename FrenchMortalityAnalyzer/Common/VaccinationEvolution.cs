@@ -92,13 +92,5 @@ namespace MortalityAnalyzer
             Projection.BuildProjection(DataTable, new DateTime(MinYearRegression, 1, 1), new DateTime(MaxYearRegression, 1, 1), 25);
             MinMax();
         }
-        void MinMax()
-        {
-            EnumerableRowCollection<double> values = DataTable.AsEnumerable().Select(r => r.Field<double>("RelativeExcess"));
-            MaxExcess = values.Max();
-            MinExcess = values.Min();
-            if (DisplayInjections)
-                MaxInjections = DataTable.AsEnumerable().Select(r => r.Field<double>("Injections")).Max();
-        }
     }
 }

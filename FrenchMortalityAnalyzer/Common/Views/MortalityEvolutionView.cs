@@ -96,14 +96,17 @@ namespace MortalityAnalyzer.Views
             evolutionChart.Title.Text = $"Excess mortality by {TimeModeText}";
         }
 
-        private void AddInjectionsSerie(ExcelWorksheet workSheet, ExcelChart evolutionChart, int startDataRow, int iLastRow)
+        private void AddInjectionsSerie(ExcelWorksheet workSheet, ExcelChart evolutionChart, int startDataRow, int iLastRow, bool adjustMinMax = false)
         {
             if (MortalityEvolution.DisplayInjections)
             {
                 var vaxChart = evolutionChart.PlotArea.ChartTypes.Add(eChartType.LineMarkers);
                 var vaccinationSerie = vaxChart.Series.Add(workSheet.Cells[startDataRow, _DataColumn + 7, iLastRow, _DataColumn + 7], workSheet.Cells[startDataRow, _DataColumn + 1, iLastRow, _DataColumn + 1]);
                 vaccinationSerie.Header = $"{MortalityEvolution.Injections} injections";
+                vaxChart.XAxis.Crosses = eCrosses.Min;
                 evolutionChart.UseSecondaryAxis = true;
+                if (adjustMinMax)
+                    AdjustMinMax(evolutionChart, vaxChart);
             }
         }
 
@@ -113,7 +116,7 @@ namespace MortalityAnalyzer.Views
             ExcelChart evolutionChart = workSheet.Drawings.AddChart("ExcessPercentEvolutionChart", eChartType.ColumnClustered);
             var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[startDataRow, _DataColumn + 6, iLastRow, _DataColumn + 6], workSheet.Cells[startDataRow, _DataColumn + 1, iLastRow, _DataColumn + 1]);
             standardizedDeathsSerie.Header = "Excess deaths (%)";
-            AddInjectionsSerie(workSheet, evolutionChart, startDataRow, iLastRow);
+            AddInjectionsSerie(workSheet, evolutionChart, startDataRow, iLastRow, true);
             evolutionChart.SetPosition(90, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
             evolutionChart.Title.Text = $"Relative excess mortality (%) by {TimeModeText}";
