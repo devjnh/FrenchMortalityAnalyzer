@@ -24,6 +24,8 @@ namespace MortalityAnalyzer.Downloaders
         }
         public void Download(string fileName, string url)
         {
+            if (File.Exists(Path.Combine(LogFolder, fileName)))
+                return;
             Console.WriteLine($"Downloading file {fileName} {url}");
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = "GET";
