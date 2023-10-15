@@ -80,14 +80,15 @@ namespace MortalityAnalyzer
             DataTable.Columns.Add("Injections", typeof(double));
             WindowFilter deathsFilter = new WindowFilter(RollingPeriod);
             WindowFilter injectionsFilter = new WindowFilter(RollingPeriod);
+            DateTime maxDate = DateTime.Today.AddDays(-90);
             foreach (DataRow dataRow in deathStatistics.Rows)
             {
                 double deaths = deathsFilter.Filter((double)dataRow[1]);
                 double injections = injectionsFilter.Filter(Convert.ToDouble(dataRow[3]));
                 if (!deathsFilter.IsBufferFull)
                     continue;
-                DataTable.Rows.Add(new object[] { dataRow[0], deaths, injections });
-
+                if ((DateTime)dataRow[0] < maxDate)
+                    DataTable.Rows.Add(new object[] { dataRow[0], deaths, injections });
             }
             Projection.BuildProjection(DataTable, new DateTime(MinYearRegression, 1, 1), new DateTime(MaxYearRegression, 1, 1), 25);
             MinMax();
