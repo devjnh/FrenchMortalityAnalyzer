@@ -70,15 +70,22 @@ namespace MortalityAnalyzer
 
         public void DownloadMissingFiles()
         {
-            var logfiles = GetLogFiles().Where(f => !f.IsDownloaded);
-            foreach (DeathLogFile deathLogFile in logfiles)
+            try
             {
-                Console.Write($"Downloading {deathLogFile.Url} ");
-                using (WebClient wc = new WebClient())
+                var logfiles = GetLogFiles().Where(f => !f.IsDownloaded);
+                foreach (DeathLogFile deathLogFile in logfiles)
                 {
-                    wc.DownloadFile(deathLogFile.Url, deathLogFile.FilePath);
+                    Console.Write($"Downloading {deathLogFile.Url} ");
+                    using (WebClient wc = new WebClient())
+                    {
+                        wc.DownloadFile(deathLogFile.Url, deathLogFile.FilePath);
+                    }
+                    Console.WriteLine("- Done");
                 }
-                Console.WriteLine("- Done");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unable to check latest death logs: {ex.Message}");
             }
         }
     }
