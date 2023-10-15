@@ -14,7 +14,6 @@ namespace MortalityAnalyzer.Common
         public abstract double GetPeriodLength(DataRow dataRow);
         public abstract string GetCountryDisplayName();
         public abstract string GetCountryInternalName();
-        public abstract string GetPopulationSqlQuery();
         public abstract string GetCountryCondition();
         public virtual void CleanDataTable(DataTable dataTable)
         {

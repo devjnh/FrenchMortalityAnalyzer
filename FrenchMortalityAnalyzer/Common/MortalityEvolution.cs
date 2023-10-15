@@ -232,7 +232,7 @@ ORDER BY {1}";
         {
             get
             {
-                string sqlCommand = GetPopulationSqlQuery();
+                string sqlCommand = $"SELECT SUM(Population) FROM AgeStructure WHERE Year = {AgeStructure.ReferenceYear} AND Gender = {(int)GenderMode}";
                 string countryCondition = GetCountryCondition();
                 if (!string.IsNullOrEmpty(countryCondition))
                     sqlCommand += $" AND {countryCondition}";
@@ -300,7 +300,6 @@ ORDER BY {1}";
 
         protected virtual double GetPeriodLength(DataRow dataRow) => _Implementation.GetPeriodLength(dataRow);
 
-        protected virtual string GetPopulationSqlQuery() => _Implementation.GetPopulationSqlQuery();
         protected virtual string GetCountryCondition() => _Implementation.GetCountryCondition();
         public virtual string GetCountryDisplayName() => _Implementation.GetCountryDisplayName();
         public virtual string GetCountryInternalName() => _Implementation.GetCountryInternalName();
