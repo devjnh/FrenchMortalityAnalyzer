@@ -22,7 +22,7 @@ namespace MortalityAnalyzer
     {
         public MortalityEvolution GetEvolutionEngine()
         {
-            MortalityEvolution mortalityEvolution = IsNormalMode ? new FrenchMortalityEvolution() : new FrenchVaccinationEvolution();
+            MortalityEvolution mortalityEvolution = IsNormalMode ? new FrenchMortalityEvolution() : new FrenchRollingEvolution();
             CopyTo(mortalityEvolution);
             return mortalityEvolution;
         }
@@ -31,11 +31,11 @@ namespace MortalityAnalyzer
 
         internal BaseEvolutionView GetView()
         {
-            return IsNormalMode ? new MortalityEvolutionView() : new VaccinationEvolutionView();
+            return IsNormalMode ? new MortalityEvolutionView() : new RollingEvolutionView();
         }
     }
     [Verb("vaxevolution", HelpText = "Mortality and Covid vaccine injections evolution by sliding weeks")]
-    public class VaccinationEvolutionOptions : FrenchVaccinationEvolution
+    public class VaccinationEvolutionOptions : FrenchRollingEvolution
     {
     }
 }

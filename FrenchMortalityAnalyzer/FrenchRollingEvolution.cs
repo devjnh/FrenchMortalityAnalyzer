@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace MortalityAnalyzer
 {
-    public class FrenchVaccinationEvolution : VaccinationEvolution
+    public class FrenchRollingEvolution : RollingEvolution
     {
-        public FrenchVaccinationEvolution()
+        public FrenchRollingEvolution()
         {
             _Implementation = new FrenchImplementation { MortalityEvolution = this };
         }

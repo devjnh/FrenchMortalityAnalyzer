@@ -12,9 +12,9 @@ using System.Threading.Tasks;
 
 namespace MortalityAnalyzer.Views
 {
-    internal class VaccinationEvolutionView : BaseEvolutionView
+    internal class RollingEvolutionView : BaseEvolutionView
     {
-        public VaccinationEvolution VaccinationEvolution => (VaccinationEvolution)MortalityEvolution;
+        public RollingEvolution VaccinationEvolution => (RollingEvolution)MortalityEvolution;
 
         protected override string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeMode}{VaccinationEvolution.RollingPeriod}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}";
         protected override string TimeModeText => $"{VaccinationEvolution.RollingPeriod} rolling {MortalityEvolution.TimeMode}";

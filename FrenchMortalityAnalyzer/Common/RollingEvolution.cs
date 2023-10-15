@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MortalityAnalyzer
 {
-    public class VaccinationEvolution : MortalityEvolution
+    public class RollingEvolution : MortalityEvolution
     {
         public string TimeField
         {
@@ -25,7 +25,7 @@ namespace MortalityAnalyzer
             }
         }
 
-        public VaccinationEvolution()
+        public RollingEvolution()
         {
             TimeMode = TimeMode.Week;
         }
