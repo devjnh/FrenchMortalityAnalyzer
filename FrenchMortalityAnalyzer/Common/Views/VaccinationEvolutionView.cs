@@ -12,56 +12,21 @@ using System.Threading.Tasks;
 
 namespace MortalityAnalyzer.Views
 {
-    internal class VaccinationEvolutionView
+    internal class VaccinationEvolutionView : BaseEvolutionView
     {
-        static VaccinationEvolutionView()
-        {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-        }
-        public string MinAgeText => MortalityEvolution.MinAge >= 0 ? MortalityEvolution.MinAge.ToString() : string.Empty;
-        public string MaxAgeText => MortalityEvolution.MaxAge >= 0 ? MortalityEvolution.MaxAge.ToString() : string.Empty;
-        private string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeField}{MortalityEvolution.RollingPeriod}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}";
-        public VaccinationEvolution MortalityEvolution { get; set; }
-        private string TimeModeText => $"{MortalityEvolution.RollingPeriod} rolling {MortalityEvolution.TimeMode}";
-        private string GetSheetName()
-        {
-            return $"{MortalityEvolution.GetCountryDisplayName()} {TimeModeText}{AgeRange}{GenderModeText}";
-        }
-        public string GenderModeText => MortalityEvolution.GenderMode == GenderFilter.All ? "" : $" {MortalityEvolution.GenderMode}";
-        private string AgeRange
-        {
-            get
-            {
-                string ageRange = string.Empty;
-                if (MortalityEvolution.MinAge >= 0)
-                    ageRange += $" {MortalityEvolution.MinAge} ≤";
+        public VaccinationEvolution VaccinationEvolution => (VaccinationEvolution)MortalityEvolution;
 
-                if (MortalityEvolution.MinAge >= 0 || MortalityEvolution.MaxAge >= 0)
-                    ageRange += " age ";
-                if (MortalityEvolution.MaxAge >= 0)
-                    ageRange += $"< {MortalityEvolution.MaxAge}";
-                return ageRange;
-            }
-        }
+        protected override string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeMode}{VaccinationEvolution.RollingPeriod}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}";
+        protected override string TimeModeText => $"{VaccinationEvolution.RollingPeriod} rolling {MortalityEvolution.TimeMode}";
 
-        private ExcelWorksheet CreateSheet(ExcelPackage package)
-        {
-            string sheetName = GetSheetName();
-            ExcelWorksheet workSheet = package.Workbook.Worksheets[sheetName];
-            if (workSheet != null)
-                package.Workbook.Worksheets.Delete(workSheet);
-            workSheet = package.Workbook.Worksheets.Add($"Sheet{BaseName}");
-            workSheet.Name = sheetName;
-            return workSheet;
-        }
-        public void Save(ExcelPackage package)
+        protected override void Save(ExcelPackage package)
         {
             ExcelWorksheet workSheet = CreateSheet(package);
             BuildWeeklyEvolutionTable(workSheet);
             BuildEvolutionChart(workSheet, _iStartWeekly + 1, workSheet.Dimension.End.Row);
             BuildExcessEvolutionChart(workSheet, _iStartWeekly + 1, workSheet.Dimension.End.Row, 30);
-            DateTime minZoomDate = MortalityEvolution.ZoomMinDate;
-            DateTime maxZoomDate = MortalityEvolution.ZoomMaxDate;
+            DateTime minZoomDate = VaccinationEvolution.ZoomMinDate;
+            DateTime maxZoomDate = VaccinationEvolution.ZoomMaxDate;
             int iZoomMin = _iStartWeekly + 1;
             int iZoomMax = workSheet.Dimension.End.Row;
             for (int i = 0; i < MortalityEvolution.DataTable.Rows.Count; i++)
@@ -149,16 +114,6 @@ namespace MortalityAnalyzer.Views
         double Round(double value, double resolution)
         {
             return Math.Round(value / resolution, MidpointRounding.AwayFromZero) * resolution;    
-        }
-        public void Save()
-        {
-            Console.WriteLine("Generating spreadsheet");
-            using (var package = new ExcelPackage(new FileInfo(Path.Combine(MortalityEvolution.Folder, MortalityEvolution.OutputFile))))
-            {
-                Save(package);
-                package.Save();
-            }
-
         }
     }
 }

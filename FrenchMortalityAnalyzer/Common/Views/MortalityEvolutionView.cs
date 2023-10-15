@@ -13,15 +13,9 @@ using System.Linq;
 
 namespace MortalityAnalyzer.Views
 {
-    internal class MortalityEvolutionView
+    internal class MortalityEvolutionView : BaseEvolutionView
     {
-        static MortalityEvolutionView()
-        {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-        }
-        internal MortalityEvolution MortalityEvolution { get; set; }
-
-        public void Save(ExcelPackage package)
+        protected override void Save(ExcelPackage package)
         {
             ExcelWorksheet workSheet = CreateSheet(package);
             BuildHeader(workSheet);
@@ -33,18 +27,7 @@ namespace MortalityAnalyzer.Views
             BuildExcessPercentEvolutionChart(workSheet, iLastEvolutionRow);
         }
 
-        private string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeMode}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{WholePeriods}";
-
-        private ExcelWorksheet CreateSheet(ExcelPackage package)
-        {
-            string sheetName = GetSheetName();
-            ExcelWorksheet workSheet = package.Workbook.Worksheets[sheetName];
-            if (workSheet != null)
-                package.Workbook.Worksheets.Delete(workSheet);
-            workSheet = package.Workbook.Worksheets.Add($"Sheet{BaseName}");
-            workSheet.Name = sheetName;
-            return workSheet;
-        }
+        protected override string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeMode}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{WholePeriods}";
 
         string GetYearFormat(TimeMode timeMode)
         {
@@ -177,28 +160,7 @@ namespace MortalityAnalyzer.Views
             workSheet.Cells[iRow, _DataColumn + 2].Style.Numberformat.Format = "0.0";
         }
 
-        private string GetSheetName()
-        {
-            return $"{MortalityEvolution.GetCountryDisplayName()} By {TimeModeText}{AgeRange}{GenderModeText}";
-        }
 
-        private string AgeRange
-        {
-            get
-            {
-                string ageRange = string.Empty;
-                if (MortalityEvolution.MinAge >= 0)
-                    ageRange += $" {MortalityEvolution.MinAge} ≤";
-
-                if (MortalityEvolution.MinAge >= 0 || MortalityEvolution.MaxAge >= 0)
-                    ageRange += " age ";
-                if (MortalityEvolution.MaxAge >= 0)
-                    ageRange += $"< {MortalityEvolution.MaxAge}";
-                return ageRange;
-            }
-        }
-
-        public string GenderModeText => MortalityEvolution.GenderMode == GenderFilter.All ? "" : $" {MortalityEvolution.GenderMode}";
 
 
         public string Period
@@ -214,10 +176,7 @@ namespace MortalityAnalyzer.Views
         private bool WholePeriods => MortalityEvolution.WholePeriods;
 
         private string TimePeriod => GetTimePeriod(MortalityEvolution.TimeMode);
-        private string TimeModeText => MortalityEvolution.TimeMode == TimeMode.YearToDate ? "Year to date" : TimePeriod;
-
-        public string MinAgeText => MortalityEvolution.MinAge >= 0 ? MortalityEvolution.MinAge.ToString() : string.Empty;
-        public string MaxAgeText => MortalityEvolution.MaxAge >= 0 ? MortalityEvolution.MaxAge.ToString() : string.Empty;
+        protected override string TimeModeText => MortalityEvolution.TimeMode == TimeMode.YearToDate ? "Year to date" : TimePeriod;
 
         static string GetTimePeriod(TimeMode mode)
         {
@@ -229,17 +188,6 @@ namespace MortalityAnalyzer.Views
                 default: return "Year";
 
             }
-        }
-
-        public void Save()
-        {
-            Console.WriteLine("Generating spreadsheet");
-            using (var package = new ExcelPackage(new FileInfo(Path.Combine(MortalityEvolution.Folder, MortalityEvolution.OutputFile))))
-            {
-                Save(package);
-                package.Save();
-            }
-
         }
     }
 }
