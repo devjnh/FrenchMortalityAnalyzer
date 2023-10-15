@@ -14,6 +14,10 @@ namespace MortalityAnalyzer.Views
 {
     internal class VaccinationEvolutionView
     {
+        static VaccinationEvolutionView()
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+        }
         public string MinAgeText => MortalityEvolution.MinAge >= 0 ? MortalityEvolution.MinAge.ToString() : string.Empty;
         public string MaxAgeText => MortalityEvolution.MaxAge >= 0 ? MortalityEvolution.MaxAge.ToString() : string.Empty;
         private string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeField}{MortalityEvolution.RollingPeriod}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}";
