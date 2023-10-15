@@ -85,9 +85,9 @@ class Program
         DeathLogs deathLogs = new DeathLogs { DatabaseEngine = databaseEngine };
         deathLogs.Extract(dataFolder);
 
-        AgeStructure ageStructure = new AgeStructure { DatabaseEngine = databaseEngine };
-        ageStructure.Load(dataFolder);
-        DeathStatistics deathStatistics = new DeathStatistics { DatabaseEngine = databaseEngine, AgeStructure = ageStructure };
+        AgeStructureLoader ageStructureLoader = new AgeStructureLoader { DatabaseEngine = databaseEngine };
+        ageStructureLoader.Load(dataFolder);
+        DeathStatistics deathStatistics = new DeathStatistics { DatabaseEngine = databaseEngine, AgeStructure = ageStructureLoader.AgeStructure };
         if (deathLogs.FilesInserted || !deathStatistics.IsBuilt)
             deathStatistics.BuildStatistics();
     }

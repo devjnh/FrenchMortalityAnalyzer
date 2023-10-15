@@ -1,4 +1,5 @@
 ﻿using MortalityAnalyzer;
+using MortalityAnalyzer.Common;
 using MortalityAnalyzer.Common.Model;
 using MortalityAnalyzer.Model;
 using OfficeOpenXml;
@@ -12,38 +13,26 @@ using System.Threading.Tasks;
 
 namespace MortalityAnalyzer
 {
-    class AgeStructure
+    class AgeStructureLoader
     {
-        static public int ReferenceYear { get; set; } = 2022;
-        public DataTable DataTable { get; private set; } = new DataTable { TableName = "AgeStructure" };
+        public DataTable DataTable { get; private set; }
         public DatabaseEngine DatabaseEngine { get; set; }
-
-        static AgeStructure()
+        static AgeStructureLoader()
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         }
-        protected DataTable CreateDataTable()
-        {
-            DataTable dataTable = DatabaseEngine.CreateDataTable(typeof(AgeStatistic), "AgeStructure");
-            dataTable.PrimaryKey = new DataColumn[] { dataTable.Columns[nameof(AgeStatistic.Year)], dataTable.Columns[nameof(AgeStatistic.Age)], dataTable.Columns[nameof(AgeStatistic.Gender)], dataTable.Columns[nameof(AgeStatistic.Country)] };
-            return dataTable;
-        }
-        private void LoadAgeStructure()
-        {
-            DataTable = CreateDataTable();
-            Console.WriteLine($"Loading age structure");
-            DatabaseEngine.FillDataTable("SELECT Year, Age, Population, Gender, Country FROM AgeStructure ORDER BY Year, Age", DataTable);
-            Console.WriteLine($"Age structure loaded");
-        }
+        public AgeStructure AgeStructure { get; private set; }
 
         public void Load(string baseFolder)
         {
+            AgeStructure = new AgeStructure(DatabaseEngine, MaxAge);
             try
             {
-                LoadAgeStructure();
+                AgeStructure.LoadAgeStructure();
                 return;
             }
             catch { }
+            DataTable = AgeStructure.DataTable;
             Extract(baseFolder);
         }
 
@@ -122,12 +111,6 @@ namespace MortalityAnalyzer
                 population = currentAgePopulation;
             else
                 population += currentAgePopulation;
-        }
-
-        public int GetPopulation(int year, int age, GenderFilter genderFilter = GenderFilter.All)
-        {
-            DataRow[] rows = DataTable.Select($"Year={year} AND Age={age} AND Gender={(int)genderFilter}");
-            return rows.Length == 1 ? (int)rows[0][nameof(AgeStatistic.Population)] : -1;
         }
     }
 }

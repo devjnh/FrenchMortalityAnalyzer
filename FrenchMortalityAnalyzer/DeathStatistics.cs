@@ -1,4 +1,5 @@
 ﻿using MortalityAnalyzer;
+using MortalityAnalyzer.Common;
 using MortalityAnalyzer.Model;
 using OfficeOpenXml;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
@@ -40,8 +41,8 @@ namespace MortalityAnalyzer
                     deathStatistic.Date = (DateTime)reader[0];
                     deathStatistic.Age = (int)reader[1];
                     deathStatistic.Deaths = Convert.ToInt32(reader[2]);
-                    deathStatistic.Population = AgeStructure.GetPopulation(deathStatistic.Date.Year, deathStatistic.Age, genderFilter);
-                    deathStatistic.RefPopulation = AgeStructure.GetPopulation(AgeStructure.ReferenceYear, deathStatistic.Age, genderFilter);
+                    deathStatistic.Population = AgeStructure.GetPopulation(deathStatistic.Date.Year, deathStatistic.Age, "FR", genderFilter);
+                    deathStatistic.RefPopulation = AgeStructure.GetPopulation(AgeStructure.ReferenceYear, deathStatistic.Age, "FR", genderFilter);
                     deathStatistic.StandardizedDeaths = (double)deathStatistic.Deaths * deathStatistic.RefPopulation / deathStatistic.Population;
                     if (year != deathStatistic.Date.Year)
                     {
