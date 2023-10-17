@@ -16,7 +16,7 @@ namespace MortalityAnalyzer.Views
     {
         public RollingEvolution VaccinationEvolution => (RollingEvolution)MortalityEvolution;
 
-        protected override string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeMode}{VaccinationEvolution.RollingPeriod}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}";
+        protected override string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeMode}{VaccinationEvolution.RollingPeriod}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{MortalityEvolution.Injections}";
         protected override string TimeModeText => $"{VaccinationEvolution.RollingPeriod} rolling {MortalityEvolution.TimeMode}";
 
         protected override void Save(ExcelPackage package)
@@ -55,9 +55,9 @@ namespace MortalityAnalyzer.Views
             tab.TableStyle = TableStyles.Light9;
 
             workSheet.Cells[_iStartData, _DataColumn, workSheet.Dimension.End.Row, _DataColumn].Style.Numberformat.Format = DateTimeFormatInfo.CurrentInfo.ShortDatePattern;
-            workSheet.Cells[_iStartData, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 4].Style.Numberformat.Format = "0.0";
-            workSheet.Cells[_iStartData, _DataColumn + 5].Value = "Excess %";
-            workSheet.Cells[_iStartData, _DataColumn + 5, workSheet.Dimension.End.Row, _DataColumn + 5].Style.Numberformat.Format = "0.0%";
+            workSheet.Cells[_iStartData, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 5].Style.Numberformat.Format = "0.0";
+            workSheet.Cells[_iStartData, _DataColumn + 4].Value = "Excess %";
+            workSheet.Cells[_iStartData, _DataColumn + 4, workSheet.Dimension.End.Row, _DataColumn + 4].Style.Numberformat.Format = "0.0%";
             range.AutoFitColumns();
         }
 
@@ -66,7 +66,7 @@ namespace MortalityAnalyzer.Views
             ExcelChart evolutionChart = workSheet.Drawings.AddChart($"RollingEvolutionChart{iFirstRow}", eChartType.Line);
             ExcelRange timeRange        = workSheet.Cells[iFirstRow, _DataColumn, iLastRow, _DataColumn];
             ExcelRange deathsRange      = workSheet.Cells[iFirstRow, _DataColumn + 1, iLastRow, _DataColumn + 1];
-            ExcelRange baseLineRange    = workSheet.Cells[iFirstRow, _DataColumn + 3, iLastRow, _DataColumn + 3];
+            ExcelRange baseLineRange    = workSheet.Cells[iFirstRow, _DataColumn + 2, iLastRow, _DataColumn + 2];
             var deathsSerie = evolutionChart.Series.Add(deathsRange, timeRange);
             deathsSerie.Header = "Standardized deaths";
             var baselineSerie = evolutionChart.Series.Add(baseLineRange, timeRange);
@@ -78,8 +78,8 @@ namespace MortalityAnalyzer.Views
         {
             ExcelChart evolutionChart = workSheet.Drawings.AddChart($"RollingExcessEvolutionChart{iFirstRow}", eChartType.Area);
             ExcelRange timeSerie        = workSheet.Cells[iFirstRow, _DataColumn, iLastRow, _DataColumn];
-            ExcelRange excessRange      = workSheet.Cells[iFirstRow, _DataColumn + 5, iLastRow, _DataColumn + 5];
-            ExcelRange injectionsRange  = workSheet.Cells[iFirstRow, _DataColumn + 2, iLastRow, _DataColumn + 2];
+            ExcelRange excessRange      = workSheet.Cells[iFirstRow, _DataColumn + 4, iLastRow, _DataColumn + 4];
+            ExcelRange injectionsRange  = workSheet.Cells[iFirstRow, _DataColumn + 5, iLastRow, _DataColumn + 5];
             var excessDeathsSerie = evolutionChart.Series.Add(excessRange, timeSerie);
             excessDeathsSerie.Header = "Excess deaths (%)";
             if (MortalityEvolution.DisplayInjections)

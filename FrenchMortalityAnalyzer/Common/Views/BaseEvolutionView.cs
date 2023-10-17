@@ -20,10 +20,15 @@ namespace MortalityAnalyzer.Views
         protected abstract string BaseName { get; }
         private string GetSheetName()
         {
-            return $"{MortalityEvolution.GetCountryDisplayName()} By {TimeModeText}{AgeRange}{GenderModeText}";
+            return $"{MortalityEvolution.GetCountryInternalName()} {TimeModeText}{AgeRange}{GenderModeText}{InjectionsText}";
         }
         protected abstract string TimeModeText { get; }
         public string GenderModeText => MortalityEvolution.GenderMode == GenderFilter.All ? "" : $" {MortalityEvolution.GenderMode}";
+        public string InjectionsText
+        {
+            get { return MortalityEvolution.Injections == VaxDose.None || MortalityEvolution.Injections == VaxDose.All ? "" : $" {MortalityEvolution.Injections}"; }
+        }
+
         protected string AgeRange
         {
             get
@@ -65,6 +70,8 @@ namespace MortalityAnalyzer.Views
 
         }
 
+        private const double _InjectionsRatio = 1.4;
+
         protected void AdjustMinMax(ExcelChart evolutionChart, ExcelChart vaxChart)
         {
             if (MortalityEvolution.MinExcess < 0)
@@ -72,8 +79,8 @@ namespace MortalityAnalyzer.Views
                 double resolution = MortalityAnalyzer.MortalityEvolution.GetHistogramResolution(-MortalityEvolution.MinExcess, 20, true);
                 evolutionChart.YAxis.MinValue = Round(MortalityEvolution.MinExcess, resolution);
                 evolutionChart.YAxis.MaxValue = MortalityEvolution.MaxExcess;
-                double minInjections = MortalityEvolution.MaxInjections * evolutionChart.YAxis.MinValue.Value / MortalityEvolution.MaxExcess * 1.4;
-                double maxInjections = MortalityEvolution.MaxInjections * 1.4;
+                double minInjections = MortalityEvolution.MaxInjections * evolutionChart.YAxis.MinValue.Value / MortalityEvolution.MaxExcess * _InjectionsRatio;
+                double maxInjections = MortalityEvolution.MaxInjections * _InjectionsRatio;
                 resolution = MortalityAnalyzer.MortalityEvolution.GetHistogramResolution(-minInjections, 20, true);
                 vaxChart.YAxis.MinValue = Round(minInjections, resolution);
                 vaxChart.YAxis.MaxValue = maxInjections;

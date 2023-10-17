@@ -23,7 +23,7 @@ ORDER BY {1}";
         }
         public string Country => "France";
         public override string GetCountryDisplayName() => Country;
-        public override string GetCountryInternalName() => Country;
+        public override string GetCountryInternalName() => "FR";
         public override string GetCountryCondition() => String.Empty;
     }
 }

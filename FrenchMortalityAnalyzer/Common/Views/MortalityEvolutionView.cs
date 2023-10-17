@@ -27,7 +27,7 @@ namespace MortalityAnalyzer.Views
             BuildExcessPercentEvolutionChart(workSheet, iLastEvolutionRow);
         }
 
-        protected override string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeMode}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{WholePeriods}";
+        protected override string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeMode}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{MortalityEvolution.Injections}";
 
         string GetYearFormat(TimeMode timeMode)
         {
