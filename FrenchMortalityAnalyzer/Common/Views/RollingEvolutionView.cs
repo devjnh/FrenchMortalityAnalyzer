@@ -14,10 +14,19 @@ namespace MortalityAnalyzer.Views
 {
     internal class RollingEvolutionView : BaseEvolutionView
     {
-        public RollingEvolution VaccinationEvolution => (RollingEvolution)MortalityEvolution;
+        public RollingEvolution RollingEvolution => (RollingEvolution)MortalityEvolution;
 
-        protected override string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeMode}{VaccinationEvolution.RollingPeriod}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{MortalityEvolution.Injections}";
-        protected override string TimeModeText => $"{VaccinationEvolution.RollingPeriod} rolling {MortalityEvolution.TimeMode}";
+        protected override string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeMode}{RollingEvolution.RollingPeriod}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{MortalityEvolution.Injections}";
+        protected override string TimeModeText
+        {
+            get
+            {
+                if (RollingEvolution.RollingPeriod == 1)
+                    return $"by {MortalityEvolution.TimeMode.ToString().ToLower()}";
+                else
+                    return $"{RollingEvolution.RollingPeriod} rolling {MortalityEvolution.TimeMode.ToString().ToLower()}s";
+            }
+        }
 
         protected override void Save(ExcelPackage package)
         {
@@ -25,8 +34,8 @@ namespace MortalityAnalyzer.Views
             BuildWeeklyEvolutionTable(workSheet);
             BuildEvolutionChart(workSheet, _iStartData + 1, workSheet.Dimension.End.Row);
             BuildExcessEvolutionChart(workSheet, _iStartData + 1, workSheet.Dimension.End.Row, 30);
-            DateTime minZoomDate = VaccinationEvolution.ZoomMinDate;
-            DateTime maxZoomDate = VaccinationEvolution.ZoomMaxDate;
+            DateTime minZoomDate = RollingEvolution.ZoomMinDate;
+            DateTime maxZoomDate = RollingEvolution.ZoomMaxDate;
             int iZoomMin = _iStartData + 1;
             int iZoomMax = workSheet.Dimension.End.Row;
             for (int i = 0; i < MortalityEvolution.DataTable.Rows.Count; i++)
@@ -73,6 +82,7 @@ namespace MortalityAnalyzer.Views
             baselineSerie.Header = "Baseline";
             evolutionChart.SetPosition(3 + startChartRow, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
+            evolutionChart.Title.Text = $"Mortality {TimeModeText}{AgeRange}";
         }
         private void BuildExcessEvolutionChart(ExcelWorksheet workSheet, int iFirstRow, int iLastRow, int startChartRow = 0, DateTime? minDate = null, DateTime? maxDate = null)
         {
@@ -93,6 +103,7 @@ namespace MortalityAnalyzer.Views
             }
             evolutionChart.SetPosition(3 + startChartRow, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
+            evolutionChart.Title.Text = $"Relative excess mortality {TimeModeText}{AgeRange}{InjectionsText}";
         }
     }
 }
