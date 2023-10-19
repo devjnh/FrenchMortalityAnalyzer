@@ -27,7 +27,7 @@ namespace MortalityAnalyzer.Views
             BuildExcessPercentEvolutionChart(workSheet, iLastEvolutionRow);
         }
 
-        protected override string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeMode}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{MortalityEvolution.Injections}";
+        protected override string BaseName => $"{CountryCode}{MortalityEvolution.TimeMode}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{MortalityEvolution.Injections}";
 
         string GetYearFormat(TimeMode timeMode)
         {
@@ -82,7 +82,7 @@ namespace MortalityAnalyzer.Views
             baselineSerie.Header = "Baseline";
             evolutionChart.SetPosition(2, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
-            evolutionChart.Title.Text = JoinTitle($"Mortality by {TimeModeText.ToLower()}", CountryDisplayName, GenderModeText, AgeRange);
+            evolutionChart.Title.Text = JoinTitle($"Mortality by {TimeModeText.ToLower()}", CountryName, GenderModeText, AgeRange);
         }
         private void BuildExcessEvolutionChart(ExcelWorksheet workSheet, int iLastRow)
         {
@@ -93,7 +93,7 @@ namespace MortalityAnalyzer.Views
             AddInjectionsSerie(workSheet, evolutionChart, startDataRow, iLastRow);
             evolutionChart.SetPosition(60, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
-            evolutionChart.Title.Text = JoinTitle($"Excess mortality by {TimeModeText.ToLower()}", CountryDisplayName, GenderModeText, AgeRange, InjectionsTitleText);
+            evolutionChart.Title.Text = JoinTitle($"Excess mortality by {TimeModeText.ToLower()}", CountryName, GenderModeText, AgeRange, InjectionsTitleText);
         }
 
         private void AddInjectionsSerie(ExcelWorksheet workSheet, ExcelChart evolutionChart, int startDataRow, int iLastRow, bool adjustMinMax = false)
@@ -119,7 +119,7 @@ namespace MortalityAnalyzer.Views
             AddInjectionsSerie(workSheet, evolutionChart, startDataRow, iLastRow, true);
             evolutionChart.SetPosition(90, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
-            evolutionChart.Title.Text = JoinTitle($"Relative excess mortality (%) by {TimeModeText.ToLower()}", CountryDisplayName, GenderModeText, AgeRange, InjectionsTitleText);
+            evolutionChart.Title.Text = JoinTitle($"Relative excess mortality (%) by {TimeModeText.ToLower()}", CountryName, GenderModeText, AgeRange, InjectionsTitleText);
         }
 
         private void BuildExcessHistogram(ExcelWorksheet workSheet)
@@ -138,7 +138,7 @@ namespace MortalityAnalyzer.Views
             int iStartColumn = _ChartsColumn;
             chart.SetPosition(30, 0, iStartColumn, _ChartsOffset);
             chart.SetSize(900, 500);
-            chart.Title.Text = JoinTitle("Death excess distribution", MortalityEvolution.GetCountryDisplayName(), GenderModeText, AgeRange);
+            chart.Title.Text = JoinTitle("Death excess distribution", CountryName, GenderModeText, AgeRange);
 
             int iRow = workSheet.Dimension.End.Row + 4;
             workSheet.Column(_DataColumn + 1).Width = 20;

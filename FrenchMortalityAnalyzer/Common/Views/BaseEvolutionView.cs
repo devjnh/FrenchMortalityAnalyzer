@@ -18,10 +18,7 @@ namespace MortalityAnalyzer.Views
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         }
         protected abstract string BaseName { get; }
-        private string GetSheetName()
-        {
-            return JoinTitle(MortalityEvolution.GetCountryInternalName(), TimeModeText, AgeRange, GenderModeText, InjectionsText );
-        }
+        private string SheetName => JoinTitle(CountryCode, TimeModeText, AgeRange, GenderModeText, InjectionsText);
 
         protected static string JoinTitle(params string[] parts)
         {
@@ -43,7 +40,8 @@ namespace MortalityAnalyzer.Views
             }
         }
         protected virtual string ByTimeModeText => MortalityEvolution.TimeMode == TimeMode.YearToDate ? "by year to date" : $"by {TimePeriod.ToLower()}";
-        public string CountryDisplayName => MortalityEvolution.GetCountryDisplayName();
+        public string CountryCode => MortalityEvolution.CountryCode;
+        public string CountryName => MortalityEvolution.CountryName;
         public string GenderModeText => MortalityEvolution.GenderMode == GenderFilter.All ? "" : $" {MortalityEvolution.GenderMode}";
         public string InjectionsText
         {
@@ -60,7 +58,7 @@ namespace MortalityAnalyzer.Views
                 return $"with {MortalityEvolution.Injections} injections";
             }
         }
-        
+
 
         protected string AgeRange
         {
@@ -82,7 +80,7 @@ namespace MortalityAnalyzer.Views
 
         protected ExcelWorksheet CreateSheet(ExcelPackage package)
         {
-            string sheetName = GetSheetName();
+            string sheetName = SheetName;
             ExcelWorksheet workSheet = package.Workbook.Worksheets[sheetName];
             if (workSheet != null)
                 package.Workbook.Worksheets.Delete(workSheet);
@@ -94,7 +92,8 @@ namespace MortalityAnalyzer.Views
         protected abstract void Save(ExcelPackage package);
         public void Save()
         {
-            Console.WriteLine($"Generating spreadsheet: {GetSheetName()}");
+            string viewName = SheetName.Replace("≤", "<=");
+            Console.WriteLine($"Generating spreadsheet: {viewName}");
             using (var package = new ExcelPackage(new FileInfo(Path.Combine(MortalityEvolution.Folder, MortalityEvolution.OutputFile))))
             {
                 Save(package);
@@ -129,7 +128,7 @@ namespace MortalityAnalyzer.Views
         {
             workSheet.Row(1).Style.Font.Bold = true;
             workSheet.Cells[1, 1].Value = $"Mortality {ByTimeModeText}";
-            workSheet.Cells[1, 5].Value = CountryDisplayName;
+            workSheet.Cells[1, 5].Value = CountryName;
             workSheet.Cells[1, 7].Value = GenderModeText;
             workSheet.Cells[1, 9].Value = AgeRange;
         }

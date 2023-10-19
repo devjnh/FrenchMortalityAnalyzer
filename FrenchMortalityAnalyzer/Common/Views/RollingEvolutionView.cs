@@ -16,7 +16,7 @@ namespace MortalityAnalyzer.Views
     {
         public RollingEvolution RollingEvolution => (RollingEvolution)MortalityEvolution;
 
-        protected override string BaseName => $"{MortalityEvolution.GetCountryInternalName()}{MortalityEvolution.TimeMode}{RollingEvolution.RollingPeriod}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{MortalityEvolution.Injections}";
+        protected override string BaseName => $"{CountryCode}{MortalityEvolution.TimeMode}{RollingEvolution.RollingPeriod}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{MortalityEvolution.Injections}";
         protected override string TimeModeText
         {
             get
@@ -92,7 +92,7 @@ namespace MortalityAnalyzer.Views
             baselineSerie.Header = "Baseline";
             evolutionChart.SetPosition(3 + startChartRow, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
-            evolutionChart.Title.Text = JoinTitle("Mortality", TimeModeText, CountryDisplayName, GenderModeText, AgeRange);
+            evolutionChart.Title.Text = JoinTitle("Mortality", TimeModeText, CountryName, GenderModeText, AgeRange);
         }
         private void BuildExcessEvolutionChart(ExcelWorksheet workSheet, int iFirstRow, int iLastRow, int startChartRow = 0, DateTime? minDate = null, DateTime? maxDate = null)
         {
@@ -113,7 +113,7 @@ namespace MortalityAnalyzer.Views
             }
             evolutionChart.SetPosition(3 + startChartRow, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
-            evolutionChart.Title.Text = JoinTitle("Relative excess mortality", TimeModeText, CountryDisplayName, GenderModeText , AgeRange, InjectionsTitleText );
+            evolutionChart.Title.Text = JoinTitle("Relative excess mortality", TimeModeText, CountryName, GenderModeText , AgeRange, InjectionsTitleText );
         }
     }
 }

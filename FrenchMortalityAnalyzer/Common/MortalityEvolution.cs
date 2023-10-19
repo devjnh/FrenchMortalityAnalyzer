@@ -281,8 +281,8 @@ ORDER BY {1}";
         protected virtual double GetPeriodLength(DataRow dataRow) => _Implementation.GetPeriodLength(dataRow);
 
         protected virtual string GetCountryCondition() => _Implementation.GetCountryCondition();
-        public virtual string GetCountryDisplayName() => _Implementation.GetCountryDisplayName();
-        public virtual string GetCountryInternalName() => _Implementation.GetCountryInternalName();
+        public virtual string CountryName => _Implementation.GetCountryDisplayName();
+        public virtual string CountryCode => _Implementation.GetCountryInternalName();
         protected SpecificImplementation _Implementation;
         public SpecificImplementation Implementation => _Implementation;
 
