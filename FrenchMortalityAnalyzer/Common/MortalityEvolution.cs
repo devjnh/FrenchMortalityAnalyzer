@@ -35,10 +35,7 @@ namespace MortalityAnalyzer
             AddConditions(conditionBuilder);
             if (!string.IsNullOrWhiteSpace(countryCondition))
                 AddCondition(countryCondition, conditionBuilder);
-            string tablePostfix = string.Empty;
-            if (GenderMode != GenderFilter.All)
-                tablePostfix = $"_{GenderMode}";
-            string query = string.Format(GetQueryTemplate(), conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", GetTimeGroupingField(TimeMode), tablePostfix);
+            string query = string.Format(GetQueryTemplate(), conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", GetTimeGroupingField(TimeMode), GenderTablePostFix);
             DataTable = DatabaseEngine.GetDataTable(query);
             if (TimeMode == TimeMode.DeltaYear)
                 DataTable.Rows.Remove(DataTable.Rows[0]);
@@ -57,6 +54,8 @@ namespace MortalityAnalyzer
                 BuildVaccinationStatistics();
             MinMax();
         }
+
+        protected string GenderTablePostFix => GenderMode != GenderFilter.All ? $"_{GenderMode}" : string.Empty;
 
         protected const string Query_Vaccination = @"SELECT {1}, SUM({2}) AS Injections FROM VaxStatistics{0}
 GROUP BY {1}

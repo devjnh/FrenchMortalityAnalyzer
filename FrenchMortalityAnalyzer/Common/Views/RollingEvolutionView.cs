@@ -24,13 +24,23 @@ namespace MortalityAnalyzer.Views
                 if (RollingEvolution.RollingPeriod == 1)
                     return $"by {MortalityEvolution.TimeMode.ToString().ToLower()}";
                 else
-                    return $"{RollingEvolution.RollingPeriod} rolling {MortalityEvolution.TimeMode.ToString().ToLower()}s";
+                    return $"{RollingEvolution.RollingPeriod} {MortalityEvolution.TimeMode.ToString().ToLower()}s";
+            }
+        }
+        protected override string ByTimeModeText
+        {
+            get
+            {
+                if (RollingEvolution.RollingPeriod == 1)
+                    return base.ByTimeModeText;
+                return $"by {MortalityEvolution.RollingPeriod} rolling {TimePeriod.ToLower()}s";
             }
         }
 
         protected override void Save(ExcelPackage package)
         {
             ExcelWorksheet workSheet = CreateSheet(package);
+            BuildHeader(workSheet);
             BuildWeeklyEvolutionTable(workSheet);
             BuildEvolutionChart(workSheet, _iStartData + 1, workSheet.Dimension.End.Row);
             BuildExcessEvolutionChart(workSheet, _iStartData + 1, workSheet.Dimension.End.Row, 30);
@@ -82,7 +92,7 @@ namespace MortalityAnalyzer.Views
             baselineSerie.Header = "Baseline";
             evolutionChart.SetPosition(3 + startChartRow, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
-            evolutionChart.Title.Text = $"Mortality {TimeModeText}{AgeRange}";
+            evolutionChart.Title.Text = JoinTitle("Mortality", TimeModeText, CountryDisplayName, GenderModeText, AgeRange);
         }
         private void BuildExcessEvolutionChart(ExcelWorksheet workSheet, int iFirstRow, int iLastRow, int startChartRow = 0, DateTime? minDate = null, DateTime? maxDate = null)
         {
@@ -103,7 +113,7 @@ namespace MortalityAnalyzer.Views
             }
             evolutionChart.SetPosition(3 + startChartRow, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
-            evolutionChart.Title.Text = $"Relative excess mortality {TimeModeText}{AgeRange}{InjectionsText}";
+            evolutionChart.Title.Text = JoinTitle("Relative excess mortality", TimeModeText, CountryDisplayName, GenderModeText , AgeRange, InjectionsTitleText );
         }
     }
 }

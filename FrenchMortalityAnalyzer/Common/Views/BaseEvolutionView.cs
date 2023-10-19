@@ -20,14 +20,47 @@ namespace MortalityAnalyzer.Views
         protected abstract string BaseName { get; }
         private string GetSheetName()
         {
-            return $"{MortalityEvolution.GetCountryInternalName()} {TimeModeText}{AgeRange}{GenderModeText}{InjectionsText}";
+            return JoinTitle(MortalityEvolution.GetCountryInternalName(), TimeModeText, AgeRange, GenderModeText, InjectionsText );
         }
-        protected abstract string TimeModeText { get; }
+
+        protected static string JoinTitle(params string[] parts)
+        {
+            return String.Join(", ", parts.Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Trim()));
+        }
+
+        protected string TimePeriod => GetTimePeriod(MortalityEvolution.TimeMode);
+        protected virtual string TimeModeText => MortalityEvolution.TimeMode == TimeMode.YearToDate ? "Year to date" : TimePeriod;
+
+        static string GetTimePeriod(TimeMode mode)
+        {
+            switch (mode)
+            {
+                case TimeMode.DeltaYear: return "Delta Year";
+                case TimeMode.Year:
+                case TimeMode.YearToDate: return "Year";
+                default: return mode.ToString();
+
+            }
+        }
+        protected virtual string ByTimeModeText => MortalityEvolution.TimeMode == TimeMode.YearToDate ? "by year to date" : $"by {TimePeriod.ToLower()}";
+        public string CountryDisplayName => MortalityEvolution.GetCountryDisplayName();
         public string GenderModeText => MortalityEvolution.GenderMode == GenderFilter.All ? "" : $" {MortalityEvolution.GenderMode}";
         public string InjectionsText
         {
             get { return MortalityEvolution.Injections == VaxDose.None || MortalityEvolution.Injections == VaxDose.All ? "" : $" {MortalityEvolution.Injections}"; }
         }
+        public string InjectionsTitleText
+        {
+            get
+            {
+                if (MortalityEvolution.Injections == VaxDose.None)
+                    return string.Empty;
+                if (MortalityEvolution.Injections == VaxDose.All)
+                    return "with all doses injections";
+                return $"with {MortalityEvolution.Injections} injections";
+            }
+        }
+        
 
         protected string AgeRange
         {
@@ -61,7 +94,7 @@ namespace MortalityAnalyzer.Views
         protected abstract void Save(ExcelPackage package);
         public void Save()
         {
-            Console.WriteLine("Generating spreadsheet");
+            Console.WriteLine($"Generating spreadsheet: {GetSheetName()}");
             using (var package = new ExcelPackage(new FileInfo(Path.Combine(MortalityEvolution.Folder, MortalityEvolution.OutputFile))))
             {
                 Save(package);
@@ -90,6 +123,15 @@ namespace MortalityAnalyzer.Views
         double Round(double value, double resolution)
         {
             return Math.Round(value / resolution, MidpointRounding.AwayFromZero) * resolution;
+        }
+
+        protected virtual void BuildHeader(ExcelWorksheet workSheet)
+        {
+            workSheet.Row(1).Style.Font.Bold = true;
+            workSheet.Cells[1, 1].Value = $"Mortality {ByTimeModeText}";
+            workSheet.Cells[1, 5].Value = CountryDisplayName;
+            workSheet.Cells[1, 7].Value = GenderModeText;
+            workSheet.Cells[1, 9].Value = AgeRange;
         }
     }
 }

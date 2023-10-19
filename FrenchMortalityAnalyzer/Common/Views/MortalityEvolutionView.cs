@@ -82,7 +82,7 @@ namespace MortalityAnalyzer.Views
             baselineSerie.Header = "Baseline";
             evolutionChart.SetPosition(2, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
-            evolutionChart.Title.Text = $"Mortality by {TimeModeText}";
+            evolutionChart.Title.Text = JoinTitle($"Mortality by {TimeModeText.ToLower()}", CountryDisplayName, GenderModeText, AgeRange);
         }
         private void BuildExcessEvolutionChart(ExcelWorksheet workSheet, int iLastRow)
         {
@@ -93,7 +93,7 @@ namespace MortalityAnalyzer.Views
             AddInjectionsSerie(workSheet, evolutionChart, startDataRow, iLastRow);
             evolutionChart.SetPosition(60, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
-            evolutionChart.Title.Text = $"Excess mortality by {TimeModeText}";
+            evolutionChart.Title.Text = JoinTitle($"Excess mortality by {TimeModeText.ToLower()}", CountryDisplayName, GenderModeText, AgeRange, InjectionsTitleText);
         }
 
         private void AddInjectionsSerie(ExcelWorksheet workSheet, ExcelChart evolutionChart, int startDataRow, int iLastRow, bool adjustMinMax = false)
@@ -119,16 +119,7 @@ namespace MortalityAnalyzer.Views
             AddInjectionsSerie(workSheet, evolutionChart, startDataRow, iLastRow, true);
             evolutionChart.SetPosition(90, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
-            evolutionChart.Title.Text = $"Relative excess mortality (%) by {TimeModeText}";
-        }
-
-        private void BuildHeader(ExcelWorksheet workSheet)
-        {
-            workSheet.Row(1).Style.Font.Bold = true;
-            workSheet.Cells[1, 1].Value = $"{MortalityEvolution.GetCountryDisplayName()} mortality evolution by {TimeModeText}";
-            workSheet.Cells[1, 5].Value = Period;
-            workSheet.Cells[1, 7].Value = GenderModeText;
-            workSheet.Cells[1, 9].Value = AgeRange;
+            evolutionChart.Title.Text = JoinTitle($"Relative excess mortality (%) by {TimeModeText.ToLower()}", CountryDisplayName, GenderModeText, AgeRange, InjectionsTitleText);
         }
 
         private void BuildExcessHistogram(ExcelWorksheet workSheet)
@@ -147,7 +138,7 @@ namespace MortalityAnalyzer.Views
             int iStartColumn = _ChartsColumn;
             chart.SetPosition(30, 0, iStartColumn, _ChartsOffset);
             chart.SetSize(900, 500);
-            chart.Title.Text = "Death excess distribution";
+            chart.Title.Text = JoinTitle("Death excess distribution", MortalityEvolution.GetCountryDisplayName(), GenderModeText, AgeRange);
 
             int iRow = workSheet.Dimension.End.Row + 4;
             workSheet.Column(_DataColumn + 1).Width = 20;
@@ -163,8 +154,12 @@ namespace MortalityAnalyzer.Views
             workSheet.Cells[iRow, _DataColumn + 2].Style.Numberformat.Format = "0.0";
         }
 
-
-
+        protected override void BuildHeader(ExcelWorksheet workSheet)
+        {
+            base.BuildHeader(workSheet);
+            if (WholePeriods)
+                workSheet.Cells[1, 12].Value = Period;
+        }
 
         public string Period
         {
@@ -177,20 +172,5 @@ namespace MortalityAnalyzer.Views
         
 
         private bool WholePeriods => MortalityEvolution.WholePeriods;
-
-        private string TimePeriod => GetTimePeriod(MortalityEvolution.TimeMode);
-        protected override string TimeModeText => MortalityEvolution.TimeMode == TimeMode.YearToDate ? "Year to date" : TimePeriod;
-
-        static string GetTimePeriod(TimeMode mode)
-        {
-            switch (mode)
-            {
-                case TimeMode.DeltaYear: return "Delta Year";
-                case TimeMode.Semester: return "Semester";
-                case TimeMode.Quarter: return "Quarter";
-                default: return "Year";
-
-            }
-        }
     }
 }

@@ -42,7 +42,7 @@ namespace MortalityAnalyzer
             AddCondition($"Year >= {MinYearRegression}", conditionBuilder);
             if (!string.IsNullOrWhiteSpace(countryCondition))
                 AddCondition(countryCondition, conditionBuilder);
-            string query = string.Format(GetQueryTemplate(), conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, "");
+            string query = string.Format(GetQueryTemplate(), conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, GenderTablePostFix);
             DataTable deathStatistics = DatabaseEngine.GetDataTable(query);
             deathStatistics.PrimaryKey = new DataColumn[] { deathStatistics.Columns[0] };
             Implementation.CleanDataTable(deathStatistics);
