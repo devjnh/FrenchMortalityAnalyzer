@@ -10,5 +10,13 @@ namespace MortalityAnalyzer
         public string Folder { get; set; } = Path.Combine(Directory.GetCurrentDirectory(), "Data");
         [Option('o', "OutputFile", Required = false, HelpText = "Output spreadsheet file (.xlsx)")]
         public string OutputFile { get; set; } = "FrenchMortality.xlsx";
+        [Option("Show", Required = false, HelpText = "Show the Excel spreadsheet.")]
+        public bool Show { get; set; } = false;
+        protected void CopyTo(Options mortalityEvolution)
+        {
+            mortalityEvolution.Folder = Folder;
+            mortalityEvolution.OutputFile = OutputFile;
+            mortalityEvolution.Show = Show;
+        }
     }
 }

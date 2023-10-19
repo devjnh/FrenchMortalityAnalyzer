@@ -41,8 +41,7 @@ namespace MortalityAnalyzer
 
         protected void CopyTo(MortalityEvolution mortalityEvolution)
         {
-            mortalityEvolution.Folder = Folder;
-            mortalityEvolution.OutputFile = OutputFile;
+            CopyTo((Options)mortalityEvolution);
             mortalityEvolution.MinYearRegression = MinYearRegression;
             mortalityEvolution.MaxYearRegression = MaxYearRegression;
             mortalityEvolution.MinAge = MinAge;

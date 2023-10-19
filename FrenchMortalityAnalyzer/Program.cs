@@ -37,7 +37,8 @@ class Program
             mortalityEvolutionView.MortalityEvolution = mortalityEvolution;
             mortalityEvolutionView.Save();
         }
-
+        if (mortalityEvolution.Show)
+            Show(mortalityEvolution);
         return 0;
     }
 
@@ -79,7 +80,7 @@ class Program
         if (deathLogs.FilesInserted || !deathStatistics.IsBuilt)
             deathStatistics.BuildStatistics();
     }
-    private static int Show(ShowOptions initOptions)
+    private static int Show(Options initOptions)
     {
         string filePath = Path.Combine(initOptions.Folder, initOptions.OutputFile);
         if (File.Exists(filePath))
