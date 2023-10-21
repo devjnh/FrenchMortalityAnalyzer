@@ -54,22 +54,22 @@ namespace MortalityAnalyzer
 
         protected string GenderTablePostFix => GenderMode != GenderFilter.All ? $"_{GenderMode}" : string.Empty;
 
-        protected const string Query_Vaccination = @"SELECT {1}, SUM({2}) AS Injections FROM VaxStatistics{0}
+        protected const string Query_Vaccination = @"SELECT {1}, {2} FROM VaxStatistics{0}
 GROUP BY {1}
 ORDER BY {1}";
         void BuildVaccinationStatistics()
         {
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
-            string query = string.Format(Query_Vaccination, conditionBuilder, TimeField, InjectionsField);
+            string query = string.Format(Query_Vaccination, conditionBuilder, TimeField, InjectionsFields);
             DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
 
             LeftJoin(DataTable, vaccinationStatistics);
         }
         protected void LeftJoin(DataTable deathStatistics, DataTable vaccinationStatistics)
         {
-            DataColumn injectionsColumn = new DataColumn("Injections", typeof(int)) { DefaultValue = 0 };
-            deathStatistics.Columns.Add(injectionsColumn);
+            foreach (VaxDose vaxDose in InjectionsDoses)
+                deathStatistics.Columns.Add(new DataColumn(vaxDose.ToString(), typeof(int)) { DefaultValue = 0 });
             deathStatistics.PrimaryKey = new DataColumn[] { deathStatistics.Columns[0] };
 
             foreach (DataRow dataRow in vaccinationStatistics.Rows)
@@ -77,7 +77,8 @@ ORDER BY {1}";
                 string filter = $"{TimeField}={TimeValueToText(dataRow[0])}";
                 DataRow[] rows = deathStatistics.Select(filter);
                 if (rows.Length >= 1)
-                    rows[0][injectionsColumn] = dataRow[injectionsColumn.ColumnName];
+                    foreach (VaxDose vaxDose in InjectionsDoses)
+                        rows[0][vaxDose.ToString()] = dataRow[vaxDose.ToString()];
             }
         }
 
@@ -88,9 +89,26 @@ ORDER BY {1}";
 
         public double MaxExcess { get; protected set; }
         public double MinExcess { get; protected set; }
-        public double MaxInjections { get; protected set; } = 0;
+        public Dictionary<VaxDose, double> MaxInjections { get; protected set; } = new Dictionary<VaxDose, double>();
 
-        protected string InjectionsField => Injections == VaxDose.All ? $"{VaxDose.D1} + {VaxDose.D2} + {VaxDose.D3}" : Injections.ToString();
+        public VaxDose[] InjectionsDoses
+        {
+            get
+            {
+                if (Injections == VaxDose.All)
+                    return new VaxDose[] { VaxDose.D1, VaxDose.D2, VaxDose.D3 };
+                return new VaxDose[] { Injections };
+            }
+        }
+        string DoseField(VaxDose dose) => $"SUM({dose}) AS {dose}";
+
+        protected string InjectionsFields
+        {
+            get
+            {
+                return Injections == VaxDose.All ? $"{DoseField(VaxDose.D1)}, {DoseField(VaxDose.D2)}, {DoseField(VaxDose.D3)}" : DoseField(Injections);
+            }
+        }
 
         private int PeriodsInYear
         {
@@ -276,8 +294,8 @@ ORDER BY {1}";
             EnumerableRowCollection<double> values = DataTable.AsEnumerable().Select(r => r.Field<double>("RelativeExcess"));
             MaxExcess = values.Max();
             MinExcess = values.Min();
-            if (DisplayInjections)
-                MaxInjections = DataTable.AsEnumerable().Select(r => Convert.ToDouble(r.Field<object>("Injections"))).Max();
+            foreach (VaxDose vaxDose in InjectionsDoses)
+                MaxInjections[vaxDose] = DataTable.AsEnumerable().Select(r => Convert.ToDouble(r.Field<object>(vaxDose.ToString()))).Max();
         }
 
         protected virtual string GetQueryTemplate() => _Implementation.GetQueryTemplate();

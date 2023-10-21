@@ -104,15 +104,15 @@ namespace MortalityAnalyzer.Views
 
         private const double _InjectionsRatio = 1.4;
 
-        protected void AdjustMinMax(ExcelChart evolutionChart, ExcelChart vaxChart)
+        protected void AdjustMinMax(ExcelChart evolutionChart, ExcelChart vaxChart, VaxDose vaxDose = VaxDose.D1)
         {
             if (MortalityEvolution.MinExcess < 0)
             {
                 double resolution = MortalityAnalyzer.MortalityEvolution.GetHistogramResolution(-MortalityEvolution.MinExcess, 20, true);
                 evolutionChart.YAxis.MinValue = Round(MortalityEvolution.MinExcess, resolution);
                 evolutionChart.YAxis.MaxValue = MortalityEvolution.MaxExcess;
-                double minInjections = MortalityEvolution.MaxInjections * evolutionChart.YAxis.MinValue.Value / MortalityEvolution.MaxExcess * _InjectionsRatio;
-                double maxInjections = MortalityEvolution.MaxInjections * _InjectionsRatio;
+                double minInjections = MortalityEvolution.MaxInjections[vaxDose] * evolutionChart.YAxis.MinValue.Value / MortalityEvolution.MaxExcess * _InjectionsRatio;
+                double maxInjections = MortalityEvolution.MaxInjections[vaxDose] * _InjectionsRatio;
                 resolution = MortalityAnalyzer.MortalityEvolution.GetHistogramResolution(-minInjections, 20, true);
                 vaxChart.YAxis.MinValue = Round(minInjections, resolution);
                 vaxChart.YAxis.MaxValue = maxInjections;

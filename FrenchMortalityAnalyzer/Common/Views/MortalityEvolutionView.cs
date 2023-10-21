@@ -21,10 +21,14 @@ namespace MortalityAnalyzer.Views
             BuildHeader(workSheet);
             BuildEvolutionTable(workSheet);
             int iLastEvolutionRow = workSheet.Dimension.End.Row;
-            BuildEvolutionChart(workSheet);
-            BuildExcessHistogram(workSheet);
-            BuildExcessEvolutionChart(workSheet, iLastEvolutionRow);
-            BuildExcessPercentEvolutionChart(workSheet, iLastEvolutionRow);
+            BuildEvolutionChart(workSheet, 0);
+            BuildExcessHistogram(workSheet, 1);
+            BuildExcessEvolutionChart(workSheet, 2, iLastEvolutionRow);
+            for (int i = 0; i < MortalityEvolution.InjectionsDoses.Length; i++)
+            {
+                VaxDose vaxDose = MortalityEvolution.InjectionsDoses[i];
+                BuildExcessPercentEvolutionChart(workSheet, 3 + i, iLastEvolutionRow, vaxDose, _DataColumn + 7 + i);
+            }
         }
 
         protected override string BaseName => $"{CountryCode}{MortalityEvolution.TimeMode}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{MortalityEvolution.Injections}";
@@ -65,8 +69,10 @@ namespace MortalityAnalyzer.Views
             workSheet.Cells[3, _DataColumn + 6, workSheet.Dimension.End.Row, _DataColumn + 6].Style.Numberformat.Format = "0.0%";
         }
         const int _ChartsColumn = 0;
+        const int _ChartsRow = 2;
+        const int _ChartsRowSpan = 30;
         const int _ChartsOffset = 25;
-        private void BuildEvolutionChart(ExcelWorksheet workSheet)
+        private void BuildEvolutionChart(ExcelWorksheet workSheet, int iChart)
         {
             ExcelChart evolutionChart = workSheet.Drawings.AddChart("chart", eChartType.ColumnClustered);
             int startDataRow = 3;
@@ -80,49 +86,49 @@ namespace MortalityAnalyzer.Views
             }
             var baselineSerie = evolutionChart.Series.Add(workSheet.Cells[startDataRow, _DataColumn + 4, endDataRow, _DataColumn + 4], workSheet.Cells[3, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 1]);
             baselineSerie.Header = "Baseline";
-            evolutionChart.SetPosition(2, 0, _ChartsColumn, _ChartsOffset);
+            evolutionChart.SetPosition(_ChartsRow + iChart * _ChartsRowSpan, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
             evolutionChart.Title.Text = JoinTitle($"Mortality by {TimeModeText.ToLower()}", CountryName, GenderModeText, AgeRange);
         }
-        private void BuildExcessEvolutionChart(ExcelWorksheet workSheet, int iLastRow)
+        private void BuildExcessEvolutionChart(ExcelWorksheet workSheet, int iChart, int iLastRow, VaxDose vaxDose = VaxDose.None, int injectionsColumn = 0)
         {
             ExcelChart evolutionChart = workSheet.Drawings.AddChart("ExcessEvolutionChart", eChartType.ColumnClustered);
             int startDataRow = 3;
             var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[startDataRow, _DataColumn + 5, iLastRow, _DataColumn + 5], workSheet.Cells[startDataRow, _DataColumn + 1, iLastRow, _DataColumn + 1]);
             standardizedDeathsSerie.Header = "Excess deaths";
-            AddInjectionsSerie(workSheet, evolutionChart, startDataRow, iLastRow);
-            evolutionChart.SetPosition(60, 0, _ChartsColumn, _ChartsOffset);
+            AddInjectionsSerie(workSheet, evolutionChart, startDataRow, iLastRow, injectionsColumn, vaxDose);
+            evolutionChart.SetPosition(_ChartsRow + iChart * _ChartsRowSpan, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
-            evolutionChart.Title.Text = JoinTitle($"Excess mortality by {TimeModeText.ToLower()}", CountryName, GenderModeText, AgeRange, InjectionsTitleText);
+            evolutionChart.Title.Text = JoinTitle($"Excess mortality by {TimeModeText.ToLower()}", CountryName, GenderModeText, AgeRange, injectionsColumn == 0 ? "" : InjectionsTitleText);
         }
 
-        private void AddInjectionsSerie(ExcelWorksheet workSheet, ExcelChart evolutionChart, int startDataRow, int iLastRow, bool adjustMinMax = false)
+        private void AddInjectionsSerie(ExcelWorksheet workSheet, ExcelChart evolutionChart, int startDataRow, int iLastRow, int injectionsColumn, VaxDose vaxDose, bool adjustMinMax = false)
         {
-            if (MortalityEvolution.DisplayInjections)
+            if (injectionsColumn > 0)
             {
                 var vaxChart = evolutionChart.PlotArea.ChartTypes.Add(eChartType.LineMarkers);
-                var vaccinationSerie = vaxChart.Series.Add(workSheet.Cells[startDataRow, _DataColumn + 7, iLastRow, _DataColumn + 7], workSheet.Cells[startDataRow, _DataColumn + 1, iLastRow, _DataColumn + 1]);
-                vaccinationSerie.Header = $"{MortalityEvolution.Injections} injections";
+                var vaccinationSerie = vaxChart.Series.Add(workSheet.Cells[startDataRow, injectionsColumn, iLastRow, injectionsColumn], workSheet.Cells[startDataRow, _DataColumn + 1, iLastRow, _DataColumn + 1]);
+                vaccinationSerie.Header = $"{vaxDose} injections";
                 vaxChart.XAxis.Crosses = eCrosses.Min;
                 evolutionChart.UseSecondaryAxis = true;
                 if (adjustMinMax)
-                    AdjustMinMax(evolutionChart, vaxChart);
+                    AdjustMinMax(evolutionChart, vaxChart, vaxDose);
             }
         }
 
-        private void BuildExcessPercentEvolutionChart(ExcelWorksheet workSheet, int iLastRow)
+        private void BuildExcessPercentEvolutionChart(ExcelWorksheet workSheet, int iChart, int iLastRow, VaxDose vaxDose, int injectionsColumn = 0)
         {
             int startDataRow = 3;
-            ExcelChart evolutionChart = workSheet.Drawings.AddChart("ExcessPercentEvolutionChart", eChartType.ColumnClustered);
+            ExcelChart evolutionChart = workSheet.Drawings.AddChart($"ExcessPercentEvolutionChart{vaxDose}", eChartType.ColumnClustered);
             var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[startDataRow, _DataColumn + 6, iLastRow, _DataColumn + 6], workSheet.Cells[startDataRow, _DataColumn + 1, iLastRow, _DataColumn + 1]);
             standardizedDeathsSerie.Header = "Excess deaths (%)";
-            AddInjectionsSerie(workSheet, evolutionChart, startDataRow, iLastRow, true);
-            evolutionChart.SetPosition(90, 0, _ChartsColumn, _ChartsOffset);
+            AddInjectionsSerie(workSheet, evolutionChart, startDataRow, iLastRow, injectionsColumn, vaxDose, true);
+            evolutionChart.SetPosition(_ChartsRow + iChart * _ChartsRowSpan, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
-            evolutionChart.Title.Text = JoinTitle($"Relative excess mortality (%) by {TimeModeText.ToLower()}", CountryName, GenderModeText, AgeRange, InjectionsTitleText);
+            evolutionChart.Title.Text = JoinTitle($"Relative excess mortality (%) by {TimeModeText.ToLower()}", CountryName, GenderModeText, AgeRange, injectionsColumn == 0 ? "" : $"with {vaxDose} injections");
         }
 
-        private void BuildExcessHistogram(ExcelWorksheet workSheet)
+        private void BuildExcessHistogram(ExcelWorksheet workSheet, int iChart)
         {
             int iStartRow = workSheet.Dimension.End.Row + 4;
             if (iStartRow < 30)
@@ -136,7 +142,7 @@ namespace MortalityAnalyzer.Views
             var excessSerie = chart.Series.Add(workSheet.Cells[iStartRow, _DataColumn + 2, workSheet.Dimension.End.Row, _DataColumn + 2], workSheet.Cells[iStartRow, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 1]);
             var normalSerie = chart.Series.Add(workSheet.Cells[iStartRow, _DataColumn + 3, workSheet.Dimension.End.Row, _DataColumn + 3], workSheet.Cells[iStartRow, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 1]);
             int iStartColumn = _ChartsColumn;
-            chart.SetPosition(30, 0, iStartColumn, _ChartsOffset);
+            chart.SetPosition(_ChartsRow + iChart * _ChartsRowSpan, 0, iStartColumn, _ChartsOffset);
             chart.SetSize(900, 500);
             chart.Title.Text = JoinTitle("Death excess distribution", CountryName, GenderModeText, AgeRange);
 

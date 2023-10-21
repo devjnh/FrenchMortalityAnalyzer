@@ -28,19 +28,17 @@ namespace MortalityAnalyzer
 
             if (DisplayInjections)
             {
-                query = string.Format(Query_Vaccination, conditionBuilder, TimeField, InjectionsField);
+                query = string.Format(Query_Vaccination, conditionBuilder, TimeField, InjectionsFields);
                 DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
                 LeftJoin(deathStatistics, vaccinationStatistics);
             }
 
             deathStatistics.Columns["Standardized"].ColumnName = "Deaths";
-            DataTable = BuildRollingAverage(deathStatistics, new string[] { "Deaths", "Injections" });
+            string[] columnNames = new string[] { "Deaths" }.Concat(InjectionsDoses.Select(d => d.ToString())).ToArray();
+            DataTable = BuildRollingAverage(deathStatistics, columnNames);
             Projection.BuildProjection(DataTable, new DateTime(MinYearRegression, 1, 1), new DateTime(MaxYearRegression, 1, 1), 25);
-            DataColumn dataColumn = DataTable.Columns["Injections"];
-            if (DisplayInjections)
-                dataColumn.SetOrdinal(DataTable.Columns.Count - 1);
-            else
-                DataTable.Columns.Remove(dataColumn);
+            foreach (VaxDose vaxDose in InjectionsDoses)
+                DataTable.Columns[vaxDose.ToString()].SetOrdinal(DataTable.Columns.Count - 1);
             MinMax();
         }
 
