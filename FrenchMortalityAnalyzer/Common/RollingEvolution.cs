@@ -18,10 +18,6 @@ namespace MortalityAnalyzer
         }
         public override void Generate()
         {
-            BuildMovingAverageStatistics();
-        }
-        void BuildMovingAverageStatistics()
-        {
             AdjustMinYearRegression();
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
@@ -37,33 +33,56 @@ namespace MortalityAnalyzer
                 LeftJoin(deathStatistics, vaccinationStatistics);
             }
 
-            DataTable = new DataTable();
-            DataTable.Columns.Add(TimeField, typeof(DateTime));
-            DataTable.Columns.Add("Deaths", typeof(double));
-            DataColumn injectionsColumn = DataTable.Columns.Add("Injections", typeof(double));
-            WindowFilter deathsFilter = new WindowFilter(RollingPeriod);
-            WindowFilter injectionsFilter = new WindowFilter(RollingPeriod);
-            DateTime maxDate = DateTime.Today.AddDays(-90);
-            foreach (DataRow dataRow in deathStatistics.Rows)
-            {
-                double deaths = deathsFilter.Filter((double)dataRow[1]);
-                double injections = injectionsFilter.Filter(Convert.ToDouble(dataRow[3]));
-                if (!deathsFilter.IsBufferFull)
-                    continue;
-                if ((DateTime)dataRow[0] < maxDate)
-                    DataTable.Rows.Add(new object[] { dataRow[0], deaths, injections });
-            }
+            deathStatistics.Columns["Standardized"].ColumnName = "Deaths";
+            DataTable = BuildRollingAverage(deathStatistics, new string[] { "Deaths", "Injections" });
             Projection.BuildProjection(DataTable, new DateTime(MinYearRegression, 1, 1), new DateTime(MaxYearRegression, 1, 1), 25);
+            DataColumn dataColumn = DataTable.Columns["Injections"];
             if (DisplayInjections)
-                injectionsColumn.SetOrdinal(DataTable.Columns.Count - 1);
+                dataColumn.SetOrdinal(DataTable.Columns.Count - 1);
             else
-                DataTable.Columns.Remove(injectionsColumn);
+                DataTable.Columns.Remove(dataColumn);
             MinMax();
+        }
+
+        private DataTable BuildRollingAverage(DataTable sourceDataTable, string[] columnNames)
+        {
+            DataTable dataTable = new DataTable();
+            dataTable.Columns.Add(TimeField, typeof(DateTime));
+            foreach (string columnName in columnNames)
+                dataTable.Columns.Add(columnName, typeof(double));
+            FieldFilter[] fieldFilters = new FieldFilter[columnNames.Length];
+            for (int i = 0; i < fieldFilters.Length; i++)
+                fieldFilters[i] = new FieldFilter { FieldName = columnNames[i], WindowFilter = new WindowFilter(RollingPeriod)};
+            foreach (DataRow dataRow in sourceDataTable.Rows)
+            {
+                foreach (FieldFilter fieldFilter in fieldFilters)
+                    fieldFilter.Filter(Convert.ToDouble(dataRow[fieldFilter.FieldName]));
+                if (!fieldFilters[0].WindowFilter.IsBufferFull)
+                    continue;
+
+                DataRow newDataRow = dataTable.NewRow();
+                newDataRow[TimeField] = dataRow[TimeField];
+                foreach (FieldFilter fieldFilter in fieldFilters)
+                    newDataRow[fieldFilter.FieldName] = fieldFilter.Average;
+                dataTable.Rows.Add(newDataRow);
+            }
+
+            return dataTable;
         }
 
         protected override string TimeValueToText(object timeValue)
         {
             return $"#{Convert.ToDateTime(timeValue).ToString(CultureInfo.InvariantCulture)}#";
+        }
+    }
+    public class FieldFilter
+    {
+        public WindowFilter WindowFilter { get; set; }
+        public string FieldName { get; set; }
+        public double Average { get; set; }
+        public void Filter(double value)
+        {
+            Average = WindowFilter.Filter(value);
         }
     }
 }
