@@ -12,19 +12,6 @@ namespace MortalityAnalyzer
 {
     public class RollingEvolution : MortalityEvolution
     {
-        public string TimeField
-        {
-            get
-            {
-                switch (TimeMode)
-                {
-                    case TimeMode.Week: return "Week";
-                    case TimeMode.Day: return "Date";
-                    default: throw new ArgumentOutOfRangeException($"The time mode {TimeMode} is  not supported!");
-                }
-            }
-        }
-
         public RollingEvolution()
         {
             TimeMode = TimeMode.Week;

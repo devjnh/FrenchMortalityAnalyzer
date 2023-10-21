@@ -35,7 +35,7 @@ namespace MortalityAnalyzer
             AddConditions(conditionBuilder);
             if (!string.IsNullOrWhiteSpace(countryCondition))
                 AddCondition(countryCondition, conditionBuilder);
-            string query = string.Format(GetQueryTemplate(), conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", GetTimeGroupingField(TimeMode), GenderTablePostFix);
+            string query = string.Format(GetQueryTemplate(), conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, GenderTablePostFix);
             DataTable = DatabaseEngine.GetDataTable(query);
             if (TimeMode == TimeMode.DeltaYear)
                 DataTable.Rows.Remove(DataTable.Rows[0]);
@@ -67,7 +67,7 @@ ORDER BY {1}";
             string countryCondition = GetCountryCondition();
             if (!string.IsNullOrWhiteSpace(countryCondition))
                 AddCondition(countryCondition, conditionBuilder);
-            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", GetTimeGroupingField(TimeMode), InjectionsField);
+            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, InjectionsField);
             DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
             vaccinationStatistics.PrimaryKey = new DataColumn[] { vaccinationStatistics.Columns[0] };
             DataTable.PrimaryKey = new DataColumn[] { DataTable.Columns[0] };
@@ -80,7 +80,7 @@ ORDER BY {1}";
                 vaccinationStatistics.Rows.Remove(vaccinationStatistics.Rows[vaccinationStatistics.Rows.Count - 1]);
             foreach (DataRow dataRow in vaccinationStatistics.Rows)
             {
-                string filter = $"{GetTimeGroupingField(TimeMode)}={(Convert.ToDouble(dataRow[0])).ToString(CultureInfo.InvariantCulture)}";
+                string filter = $"{TimeField}={(Convert.ToDouble(dataRow[0])).ToString(CultureInfo.InvariantCulture)}";
                 DataRow[] rows = DataTable.Select(filter);
                 rows[0][injectionsColumn] = dataRow[1];
             }
@@ -174,16 +174,21 @@ ORDER BY {1}";
             conditionsBuilder.Append(condition);
         }
 
-        string GetTimeGroupingField(TimeMode mode)
+        public string TimeField
         {
-            switch (mode)
+            get
             {
-                case TimeMode.DeltaYear: return nameof(DeathStatistic.DeltaYear);
-                case TimeMode.Semester: return nameof(DeathStatistic.Semester);
-                case TimeMode.Quarter: return nameof(DeathStatistic.Quarter);
-                case TimeMode.YearToDate:
-                case TimeMode.Year: return nameof(DeathStatistic.Year);
-                default: throw new ArgumentOutOfRangeException($"The time mode {TimeMode} is  not supported!");
+                switch (TimeMode)
+                {
+                    case TimeMode.DeltaYear: return nameof(DeathStatistic.DeltaYear);
+                    case TimeMode.Semester: return nameof(DeathStatistic.Semester);
+                    case TimeMode.Quarter: return nameof(DeathStatistic.Quarter);
+                    case TimeMode.YearToDate:
+                    case TimeMode.Year: return nameof(DeathStatistic.Year);
+                    case TimeMode.Week: return nameof(DeathStatistic.Week);
+                    case TimeMode.Day: return nameof(DeathStatistic.Date);
+                    default: throw new ArgumentOutOfRangeException($"The time mode {TimeMode} is  not supported!");
+                }
             }
         }
 
@@ -229,7 +234,7 @@ ORDER BY {1}";
 
         void BuildExcessHistogram()
         {
-            var values = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(GetTimeGroupingField(TimeMode))) > MinYearRegression).Select(r => r.Field<double>("Excess")).ToArray();
+            var values = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(TimeField)) > MinYearRegression).Select(r => r.Field<double>("Excess")).ToArray();
             double max = values.Max();
             double min = values.Min();
             double resolution = GetHistogramResolution(max - min, 15);
@@ -246,7 +251,7 @@ ORDER BY {1}";
             ExcessHistogram.Columns.Add("Excess", typeof(double));
             ExcessHistogram.Columns.Add("Frequency", typeof(double));
             ExcessHistogram.Columns.Add("Normal", typeof(double));
-            double[] standardizedDeaths = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(GetTimeGroupingField(TimeMode))) > MinYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
+            double[] standardizedDeaths = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(TimeField)) > MinYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
             double averageDeaths = standardizedDeaths.Average();
             DeathRate = averageDeaths / Population;
             StandardDeviation = Math.Sqrt(DeathRate * (1 - DeathRate) * Population);
