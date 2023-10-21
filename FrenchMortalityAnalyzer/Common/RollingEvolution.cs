@@ -22,41 +22,25 @@ namespace MortalityAnalyzer
         }
         void BuildMovingAverageStatistics()
         {
-            string countryCondition = GetCountryCondition();
-            AdjustMinYearRegression(countryCondition);
+            AdjustMinYearRegression();
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
-            AddCondition($"Year >= {MinYearRegression}", conditionBuilder);
-            if (!string.IsNullOrWhiteSpace(countryCondition))
-                AddCondition(countryCondition, conditionBuilder);
-            string query = string.Format(GetQueryTemplate(), conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, GenderTablePostFix);
+            string query = string.Format(GetQueryTemplate(), conditionBuilder, TimeField, GenderTablePostFix);
             DataTable deathStatistics = DatabaseEngine.GetDataTable(query);
-            deathStatistics.PrimaryKey = new DataColumn[] { deathStatistics.Columns[0] };
             Implementation.CleanDataTable(deathStatistics);
             deathStatistics.Rows.Remove(deathStatistics.Rows[deathStatistics.Rows.Count - 1]);
-            DataColumn injectionsColumn = deathStatistics.Columns.Add("Injections", typeof(int));
-            foreach (DataRow dataRow in deathStatistics.Rows)
-                dataRow[injectionsColumn] = 0;
 
             if (DisplayInjections)
             {
-                query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, InjectionsField);
+                query = string.Format(Query_Vaccination, conditionBuilder, TimeField, InjectionsField);
                 DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
-                vaccinationStatistics.PrimaryKey = new DataColumn[] { vaccinationStatistics.Columns[0] };
-
-                foreach (DataRow dataRow in vaccinationStatistics.Rows)
-                {
-                    string filter = $"{TimeField}=#{Convert.ToDateTime(dataRow[0]).ToString(CultureInfo.InvariantCulture)}#";
-                    DataRow[] rows = deathStatistics.Select(filter);
-                    if (rows.Length >= 1)
-                        rows[0][injectionsColumn] = dataRow[1];
-                }
+                LeftJoin(deathStatistics, vaccinationStatistics);
             }
 
             DataTable = new DataTable();
             DataTable.Columns.Add(TimeField, typeof(DateTime));
             DataTable.Columns.Add("Deaths", typeof(double));
-            injectionsColumn = DataTable.Columns.Add("Injections", typeof(double));
+            DataColumn injectionsColumn = DataTable.Columns.Add("Injections", typeof(double));
             WindowFilter deathsFilter = new WindowFilter(RollingPeriod);
             WindowFilter injectionsFilter = new WindowFilter(RollingPeriod);
             DateTime maxDate = DateTime.Today.AddDays(-90);
@@ -75,6 +59,11 @@ namespace MortalityAnalyzer
             else
                 DataTable.Columns.Remove(injectionsColumn);
             MinMax();
+        }
+
+        protected override string TimeValueToText(object timeValue)
+        {
+            return $"#{Convert.ToDateTime(timeValue).ToString(CultureInfo.InvariantCulture)}#";
         }
     }
 }

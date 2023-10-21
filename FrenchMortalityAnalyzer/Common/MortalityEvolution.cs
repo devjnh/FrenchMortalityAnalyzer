@@ -26,16 +26,13 @@ namespace MortalityAnalyzer
             else
                 LastDay = Convert.ToDateTime(DatabaseEngine.GetValue($"SELECT MAX(Date) FROM {DeathStatistic.StatisticsTableName}")).AddDays(-ToDateDelay);
 
-            string countryCondition = GetCountryCondition();
-            AdjustMinYearRegression(countryCondition);
+            AdjustMinYearRegression();
 
             string toDate = WholePeriods ? "" : " to date";
             Console.WriteLine($"Generating mortality evolution");
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
-            if (!string.IsNullOrWhiteSpace(countryCondition))
-                AddCondition(countryCondition, conditionBuilder);
-            string query = string.Format(GetQueryTemplate(), conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, GenderTablePostFix);
+            string query = string.Format(GetQueryTemplate(), conditionBuilder, TimeField, GenderTablePostFix);
             DataTable = DatabaseEngine.GetDataTable(query);
             if (TimeMode == TimeMode.DeltaYear)
                 DataTable.Rows.Remove(DataTable.Rows[0]);
@@ -64,26 +61,29 @@ ORDER BY {1}";
         {
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
-            string countryCondition = GetCountryCondition();
-            if (!string.IsNullOrWhiteSpace(countryCondition))
-                AddCondition(countryCondition, conditionBuilder);
-            string query = string.Format(Query_Vaccination, conditionBuilder.Length > 0 ? $" WHERE {conditionBuilder}" : "", TimeField, InjectionsField);
+            string query = string.Format(Query_Vaccination, conditionBuilder, TimeField, InjectionsField);
             DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
-            vaccinationStatistics.PrimaryKey = new DataColumn[] { vaccinationStatistics.Columns[0] };
-            DataTable.PrimaryKey = new DataColumn[] { DataTable.Columns[0] };
-            DataColumn injectionsColumn = DataTable.Columns.Add("Injections", typeof(int));
-            foreach (DataRow dataRow in DataTable.Rows)
-                dataRow[injectionsColumn] = 0;
-            if (vaccinationStatistics.Rows.Count == 0)
-                return;
-            if (WholePeriods)
-                vaccinationStatistics.Rows.Remove(vaccinationStatistics.Rows[vaccinationStatistics.Rows.Count - 1]);
+
+            LeftJoin(DataTable, vaccinationStatistics);
+        }
+        protected void LeftJoin(DataTable deathStatistics, DataTable vaccinationStatistics)
+        {
+            DataColumn injectionsColumn = new DataColumn("Injections", typeof(int)) { DefaultValue = 0 };
+            deathStatistics.Columns.Add(injectionsColumn);
+            deathStatistics.PrimaryKey = new DataColumn[] { deathStatistics.Columns[0] };
+
             foreach (DataRow dataRow in vaccinationStatistics.Rows)
             {
-                string filter = $"{TimeField}={(Convert.ToDouble(dataRow[0])).ToString(CultureInfo.InvariantCulture)}";
-                DataRow[] rows = DataTable.Select(filter);
-                rows[0][injectionsColumn] = dataRow[1];
+                string filter = $"{TimeField}={TimeValueToText(dataRow[0])}";
+                DataRow[] rows = deathStatistics.Select(filter);
+                if (rows.Length >= 1)
+                    rows[0][injectionsColumn] = dataRow[injectionsColumn.ColumnName];
             }
+        }
+
+        protected virtual string TimeValueToText(object timeValue)
+        {
+            return (Convert.ToDouble(timeValue)).ToString(CultureInfo.InvariantCulture);
         }
 
         public double MaxExcess { get; protected set; }
@@ -121,6 +121,7 @@ ORDER BY {1}";
             if (MaxAge > 0)
                 AddCondition($"Age < {MaxAge}", conditionBuilder);
             AddCondition($"Year >= {MinYearRegression}", conditionBuilder);
+            AddCondition(GetCountryCondition(), conditionBuilder);
         }
 
         public double StandardizedPeriodLength => 365 * PeriodInFractionOfYear;
@@ -169,8 +170,10 @@ ORDER BY {1}";
 
         protected void AddCondition(string condition, StringBuilder conditionsBuilder)
         {
-            if (conditionsBuilder.Length > 0)
-                conditionsBuilder.Append(" AND ");
+            if (string.IsNullOrWhiteSpace(condition))
+                return;
+
+            conditionsBuilder.Append(conditionsBuilder.Length > 0 ? " AND " : " WHERE ");
             conditionsBuilder.Append(condition);
         }
 
@@ -281,7 +284,7 @@ ORDER BY {1}";
 
         protected virtual void CleanDataTable() => _Implementation.CleanDataTable(DataTable);
 
-        protected virtual void AdjustMinYearRegression(string countryCondition) => _Implementation.AdjustMinYearRegression(countryCondition);
+        protected virtual void AdjustMinYearRegression() => _Implementation.AdjustMinYearRegression(GetCountryCondition());
 
         protected virtual double GetPeriodLength(DataRow dataRow) => _Implementation.GetPeriodLength(dataRow);
 
