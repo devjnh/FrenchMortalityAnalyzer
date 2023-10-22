@@ -24,7 +24,7 @@ namespace MortalityAnalyzer
             if (WholePeriods)
                 LastDay = DateTime.MaxValue;
             else
-                LastDay = Convert.ToDateTime(DatabaseEngine.GetValue($"SELECT MAX(Date) FROM {DeathStatistic.StatisticsTableName}")).AddDays(-ToDateDelay);
+                LastDay = Convert.ToDateTime(DatabaseEngine.GetValue($"SELECT MAX(Date) FROM {DatabaseEngine.GetTableName(typeof(DeathStatistic))}")).AddDays(-ToDateDelay);
 
             AdjustMinYearRegression();
 

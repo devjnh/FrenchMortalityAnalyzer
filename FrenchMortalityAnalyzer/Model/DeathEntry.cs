@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MortalityAnalyzer
 {
-    public class DeathEntry : IEntry
+    public class DeathEntry
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -120,47 +120,6 @@ namespace MortalityAnalyzer
             }
 
             return DateTime.MinValue;
-        }
-
-        public void ToRow(DataRow dataRow)
-        {
-            dataRow[nameof(DeathEntry.FirstName)] = FirstName;
-            dataRow[nameof(DeathEntry.LastName)] = LastName;
-            dataRow[nameof(DeathEntry.DeathDate)] = DeathDate;
-            dataRow[nameof(DeathEntry.DeathPlaceId)] = DeathPlaceId;
-            dataRow[nameof(DeathEntry.DeathDepartement)] = DeathDepartement;
-            dataRow[nameof(DeathEntry.DeathId)] = DeathId;
-            dataRow[nameof(DeathEntry.Gender)] = (int)Gender;
-            dataRow[nameof(DeathEntry.BirthDate)] = BirthDate;
-            dataRow[nameof(DeathEntry.BirthPlace)] = BirthPlace;
-            dataRow[nameof(DeathEntry.BirthCountry)] = BirthCountry;
-            dataRow[nameof(DeathEntry.BirthPlaceId)] = BirthPlaceId;
-            dataRow[nameof(DeathEntry.BirthDepartement)] = BirthDepartement;
-            dataRow[nameof(DeathEntry.Age)] = Age == null ? DBNull.Value : Age;
-            dataRow[nameof(DeathEntry.AgeInDays)] = AgeInDays == null ? DBNull.Value : AgeInDays;
-            dataRow[nameof(DeathEntry.LogFile)] = LogFile;
-        }
-        public static DataTable CreateDataTable()
-        {
-            DataTable dataTable = new DataTable();
-            dataTable.TableName = "Deaths";
-            dataTable.Columns.Add(nameof(FirstName), typeof(string));
-            dataTable.Columns.Add(nameof(LastName), typeof(string));
-            dataTable.Columns.Add(nameof(DeathDate), typeof(DateTime));
-            dataTable.Columns.Add(nameof(DeathPlaceId), typeof(string));
-            dataTable.Columns.Add(nameof(DeathDepartement), typeof(string));
-            dataTable.Columns.Add(nameof(DeathId), typeof(string));
-            dataTable.Columns.Add(nameof(Gender), typeof(int));
-            dataTable.Columns.Add(nameof(BirthDate), typeof(DateTime));
-            dataTable.Columns.Add(nameof(BirthPlace), typeof(string));
-            dataTable.Columns.Add(nameof(BirthCountry), typeof(string));
-            dataTable.Columns.Add(nameof(BirthPlaceId), typeof(string));
-            dataTable.Columns.Add(nameof(BirthDepartement), typeof(string));
-            dataTable.Columns.Add(nameof(Age), typeof(int));
-            dataTable.Columns.Add(nameof(AgeInDays), typeof(int));
-            dataTable.Columns.Add(nameof(LogFile), typeof(string));
-
-            return dataTable;
         }
     }
     public enum Gender { Unknown = 0, Male = 1, Female = 2 }
