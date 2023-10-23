@@ -18,6 +18,8 @@ namespace MortalityAnalyzer
         }
         public override void Generate()
         {
+            Console.WriteLine($"Generating mortality evolution");
+            RetrieveLastDay();
             AdjustMinYearRegression();
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);

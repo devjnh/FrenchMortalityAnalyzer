@@ -21,15 +21,10 @@ namespace MortalityAnalyzer
 
         public virtual void Generate()
         {
-            if (WholePeriods)
-                LastDay = DateTime.MaxValue;
-            else
-                LastDay = Convert.ToDateTime(DatabaseEngine.GetValue($"SELECT MAX(Date) FROM {DatabaseEngine.GetTableName(typeof(DeathStatistic))}")).AddDays(-ToDateDelay);
-
+            Console.WriteLine($"Generating mortality evolution");
+            RetrieveLastDay();
             AdjustMinYearRegression();
 
-            string toDate = WholePeriods ? "" : " to date";
-            Console.WriteLine($"Generating mortality evolution");
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
             string query = string.Format(GetQueryTemplate(), conditionBuilder, TimeField, GenderTablePostFix);
@@ -50,6 +45,11 @@ namespace MortalityAnalyzer
             if (DisplayInjections)
                 BuildVaccinationStatistics();
             MinMax();
+        }
+
+        protected void RetrieveLastDay()
+        {
+            LastDay = Convert.ToDateTime(DatabaseEngine.GetValue($"SELECT MAX(Date) FROM {DatabaseEngine.GetTableName(typeof(DeathStatistic))}")).AddDays(-ToDateDelay);
         }
 
         protected string GenderTablePostFix => GenderMode != GenderFilter.All ? $"_{GenderMode}" : string.Empty;
@@ -132,13 +132,12 @@ ORDER BY {1}";
 
         protected void AddConditions(StringBuilder conditionBuilder)
         {
-            if (!WholePeriods)
-                AddCondition($"DayOfYear <= {LastDay.DayOfYear}", conditionBuilder);
             if (MinAge > 0)
                 AddCondition($"Age >= {MinAge}", conditionBuilder);
             if (MaxAge > 0)
                 AddCondition($"Age < {MaxAge}", conditionBuilder);
             AddCondition($"Year >= {MinYearRegression}", conditionBuilder);
+            AddCondition(WholePeriods ? $"Date <= '{LastDay}'" : $"DayOfYear <= {LastDay.DayOfYear}", conditionBuilder);
             AddCondition(GetCountryCondition(), conditionBuilder);
         }
 
