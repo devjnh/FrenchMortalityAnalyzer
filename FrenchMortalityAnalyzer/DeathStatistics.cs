@@ -28,7 +28,6 @@ namespace MortalityAnalyzer
         public void BuildStatistics(GenderFilter genderFilter)
         {
             Console.WriteLine($"Building death statistics. Gender: {genderFilter}");
-            DatabaseEngine.Prepare(CreateDataTable(genderFilter));
             string sexFilter = string.Empty;
             if (genderFilter != GenderFilter.All)
                 sexFilter = $" AND Gender = {(int)genderFilter}";
@@ -39,6 +38,7 @@ namespace MortalityAnalyzer
                 {
                     DeathStatistic deathStatistic = new DeathStatistic { Country = "FR", AgeSpan = 1, DaySpan = 1};
                     deathStatistic.Date = (DateTime)reader[0];
+                    deathStatistic.Gender = genderFilter;
                     deathStatistic.Age = (int)reader[1];
                     deathStatistic.Deaths = Convert.ToInt32(reader[2]);
                     deathStatistic.Population = AgeStructure.GetPopulation(deathStatistic.Date.Year, deathStatistic.Age, "FR", genderFilter);
@@ -53,22 +53,21 @@ namespace MortalityAnalyzer
                     DatabaseEngine.Insert(deathStatistic);
                 }
             }
-            DatabaseEngine.FinishInsertion();
         }
 
-        private static DataTable CreateDataTable(GenderFilter genderFilter)
+        private static DataTable CreateDataTable()
         {
             string tableName = DatabaseEngine.GetTableName(typeof(DeathStatistic));
-            if (genderFilter != GenderFilter.All)
-                tableName = $"{tableName}_{genderFilter}";
             return DatabaseEngine.CreateDataTable(typeof(DeathStatistic), tableName);
         }
 
         public void BuildStatistics()
         {
+            DatabaseEngine.Prepare(CreateDataTable());
             BuildStatistics(GenderFilter.All);
             BuildStatistics(GenderFilter.Male);
             BuildStatistics(GenderFilter.Female);
+            DatabaseEngine.FinishInsertion();
         }
 
         public bool IsBuilt => DatabaseEngine.DoesTableExist(typeof(DeathStatistic));

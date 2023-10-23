@@ -31,5 +31,6 @@ namespace MortalityAnalyzer.Model
         public string Country { get; set; }
         public int Age { get; set; }
         public int AgeSpan { get; set; } = 5;
+        public GenderFilter Gender { get; set; }
     }
 }

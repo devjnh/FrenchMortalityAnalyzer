@@ -27,7 +27,7 @@ namespace MortalityAnalyzer
 
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
-            string query = string.Format(GetQueryTemplate(), conditionBuilder, TimeField, GenderTablePostFix);
+            string query = string.Format(GetQueryTemplate(), conditionBuilder, TimeField);
             DataTable = DatabaseEngine.GetDataTable(query);
             if (TimeMode == TimeMode.DeltaYear)
                 DataTable.Rows.Remove(DataTable.Rows[0]);
@@ -52,7 +52,6 @@ namespace MortalityAnalyzer
             LastDay = Convert.ToDateTime(DatabaseEngine.GetValue($"SELECT MAX(Date) FROM {DatabaseEngine.GetTableName(typeof(DeathStatistic))}")).AddDays(-ToDateDelay);
         }
 
-        protected string GenderTablePostFix => GenderMode != GenderFilter.All ? $"_{GenderMode}" : string.Empty;
 
         protected const string Query_Vaccination = @"SELECT {1}, {2} FROM VaxStatistics{0}
 GROUP BY {1}
@@ -141,6 +140,7 @@ ORDER BY {1}";
             AddCondition($"Year >= {MinYearRegression}", conditionBuilder);
             AddCondition(WholePeriods ? $"Date <= '{LastDay}'" : $"DayOfYear <= {LastDay.DayOfYear}", conditionBuilder);
             AddCondition(GetCountryCondition(), conditionBuilder);
+            AddCondition($"Gender = {(int)GenderMode}", conditionBuilder);
         }
 
         public double StandardizedPeriodLength => 365 * PeriodInFractionOfYear;

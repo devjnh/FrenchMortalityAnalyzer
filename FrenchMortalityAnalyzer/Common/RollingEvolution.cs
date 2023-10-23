@@ -23,7 +23,7 @@ namespace MortalityAnalyzer
             AdjustMinYearRegression();
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
-            string query = string.Format(GetQueryTemplate(), conditionBuilder, TimeField, GenderTablePostFix);
+            string query = string.Format(GetQueryTemplate(), conditionBuilder, TimeField);
             DataTable deathStatistics = DatabaseEngine.GetDataTable(query);
             Implementation.CleanDataTable(deathStatistics);
             deathStatistics.Rows.Remove(deathStatistics.Rows[deathStatistics.Rows.Count - 1]);

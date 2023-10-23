@@ -10,7 +10,8 @@ namespace MortalityAnalyzer
 {
     internal class FrenchImplementation : SpecificImplementation
     {
-        public const string Query_Years = @"SELECT {1}, SUM(DeathStatistics{2}.StandardizedDeaths) AS Standardized, SUM(DeathStatistics{2}.Deaths) AS Raw  FROM DeathStatistics{2}{0}
+        public const string Query_Years = @"SELECT {1}, SUM(StandardizedDeaths) AS Standardized, SUM(Deaths) AS Raw  FROM DeathStatistics
+{0}
 GROUP BY {1}
 ORDER BY {1}";
         public override string GetQueryTemplate()

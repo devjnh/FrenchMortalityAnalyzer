@@ -240,13 +240,14 @@ namespace MortalityAnalyzer
                 }
             }
         }
-        public bool DoesTableExist(string tableName)
+        public bool DoesTableExist(string tableName, IEnumerable<string> fields = null)
         {
             try
             {
+                string fieldList = fields == null ? "*" : string.Join(",", fields);
                 using (DbCommand command = DatabaseConnection.CreateCommand())
                 {
-                    command.CommandText = $"SELECT * FROM {tableName} LIMIT 1";
+                    command.CommandText = $"SELECT {fieldList} FROM {tableName} LIMIT 1";
                     command.ExecuteNonQuery();
                 }
                 return true;
@@ -258,7 +259,7 @@ namespace MortalityAnalyzer
 
         }
 
-        public bool DoesTableExist(Type type) => DoesTableExist(GetTableName(type));
+        public bool DoesTableExist(Type type) => DoesTableExist(GetTableName(type), GetFields(type));
 
         public static DataTable CreateDataTable(Type type)
         {
@@ -301,6 +302,14 @@ namespace MortalityAnalyzer
             }
 
             return dataRow;
+        }
+        public static IEnumerable<string> GetFields(Type type)
+        {
+            if (type.BaseType != typeof(object))
+                foreach (string item in GetFields(type.BaseType))
+                    yield return item;
+            foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+                yield return property.Name;
         }
     }
 }

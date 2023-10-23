@@ -21,7 +21,7 @@ namespace MortalityAnalyzer.Parser
         Dictionary<string, int> _Fields = new Dictionary<string, int>();
         protected void ImportFromCsvFile(string filePath)
         {
-            DatabaseEngine.Prepare(CreateDataTable(), false);
+            DatabaseEngine.Prepare(CreateDataTable());
             using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 using (StreamReader textReader = new StreamReader(fileStream))
