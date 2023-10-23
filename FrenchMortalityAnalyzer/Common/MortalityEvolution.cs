@@ -138,7 +138,7 @@ ORDER BY {1}";
             if (MaxAge > 0)
                 AddCondition($"Age < {MaxAge}", conditionBuilder);
             AddCondition($"Year >= {MinYearRegression}", conditionBuilder);
-            AddCondition(WholePeriods ? $"Date <= '{LastDay}'" : $"DayOfYear <= {LastDay.DayOfYear}", conditionBuilder);
+            AddCondition(WholePeriods ? $"Date <= '{LastDay:yyyy-MM-dd HH:mm:ss}'" : $"DayOfYear <= {LastDay.DayOfYear}", conditionBuilder);
             AddCondition(GetCountryCondition(), conditionBuilder);
             AddCondition($"Gender = {(int)GenderMode}", conditionBuilder);
         }
