@@ -97,6 +97,8 @@ ORDER BY {1}";
             {
                 if (Injections == VaxDose.All)
                     return new VaxDose[] { VaxDose.D1, VaxDose.D2, VaxDose.D3 };
+                if (Injections == VaxDose.None)
+                    return new VaxDose[0];
                 return new VaxDose[] { Injections };
             }
         }

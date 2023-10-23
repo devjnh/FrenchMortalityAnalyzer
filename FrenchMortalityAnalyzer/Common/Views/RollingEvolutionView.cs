@@ -43,24 +43,29 @@ namespace MortalityAnalyzer.Views
             BuildHeader(workSheet);
             BuildWeeklyEvolutionTable(workSheet);
             BuildEvolutionChart(workSheet, _iStartData + 1, workSheet.Dimension.End.Row);
-            for (int j = 0; j < MortalityEvolution.InjectionsDoses.Length; j++)
+            if (MortalityEvolution.InjectionsDoses.Length == 0)
+                BuildExcessEvolutionChart(workSheet, 0, VaxDose.None);
+            else
+                for (int j = 0; j < MortalityEvolution.InjectionsDoses.Length; j++)
+                    BuildExcessEvolutionChart(workSheet, j, MortalityEvolution.InjectionsDoses[j]);
+        }
+
+        private void BuildExcessEvolutionChart(ExcelWorksheet workSheet, int j, VaxDose vaxDose)
+        {
+            BuildExcessEvolutionChart(workSheet, _iStartData + 1, workSheet.Dimension.End.Row, _DataColumn + 5 + j, vaxDose, 30 + j * 60);
+            DateTime minZoomDate = RollingEvolution.ZoomMinDate;
+            DateTime maxZoomDate = RollingEvolution.ZoomMaxDate;
+            int iZoomMin = _iStartData + 1;
+            int iZoomMax = workSheet.Dimension.End.Row;
+            for (int i = 0; i < MortalityEvolution.DataTable.Rows.Count; i++)
             {
-                VaxDose vaxDose = MortalityEvolution.InjectionsDoses[j];
-                BuildExcessEvolutionChart(workSheet, _iStartData + 1, workSheet.Dimension.End.Row, _DataColumn + 5 + j, vaxDose, 30 + j * 60);
-                DateTime minZoomDate = RollingEvolution.ZoomMinDate;
-                DateTime maxZoomDate = RollingEvolution.ZoomMaxDate;
-                int iZoomMin = _iStartData + 1;
-                int iZoomMax = workSheet.Dimension.End.Row;
-                for (int i = 0; i < MortalityEvolution.DataTable.Rows.Count; i++)
-                {
-                    DateTime date = (DateTime)MortalityEvolution.DataTable.Rows[i][0];
-                    if (iZoomMin == _iStartData + 1 && date >= minZoomDate)
-                        iZoomMin = _iStartData + 1 + i;
-                    if (iZoomMax == workSheet.Dimension.End.Row && date >= maxZoomDate)
-                        iZoomMax = _iStartData + 1 + i;
-                }
-                BuildExcessEvolutionChart(workSheet, iZoomMin, iZoomMax, _DataColumn + 5 + j, vaxDose, 60 + j * 60);
+                DateTime date = (DateTime)MortalityEvolution.DataTable.Rows[i][0];
+                if (iZoomMin == _iStartData + 1 && date >= minZoomDate)
+                    iZoomMin = _iStartData + 1 + i;
+                if (iZoomMax == workSheet.Dimension.End.Row && date >= maxZoomDate)
+                    iZoomMax = _iStartData + 1 + i;
             }
+            BuildExcessEvolutionChart(workSheet, iZoomMin, iZoomMax, _DataColumn + 5 + j, vaxDose, 60 + j * 60);
         }
 
         const int _ChartsColumn = 0;
@@ -107,7 +112,7 @@ namespace MortalityAnalyzer.Views
             ExcelRange injectionsRange  = workSheet.Cells[iFirstRow, injectionsColumn, iLastRow, injectionsColumn];
             var excessDeathsSerie = evolutionChart.Series.Add(excessRange, timeSerie);
             excessDeathsSerie.Header = "Excess deaths (%)";
-            if (injectionsColumn > 0)
+            if (vaxDose != VaxDose.None)
             {
                 var vaxChart = evolutionChart.PlotArea.ChartTypes.Add(eChartType.Line);
                 var vaccinationSerie = vaxChart.Series.Add(injectionsRange, timeSerie);

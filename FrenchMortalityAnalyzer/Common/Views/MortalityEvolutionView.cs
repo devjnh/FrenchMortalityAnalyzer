@@ -24,11 +24,14 @@ namespace MortalityAnalyzer.Views
             BuildEvolutionChart(workSheet, 0);
             BuildExcessHistogram(workSheet, 1);
             BuildExcessEvolutionChart(workSheet, 2, iLastEvolutionRow);
-            for (int i = 0; i < MortalityEvolution.InjectionsDoses.Length; i++)
-            {
-                VaxDose vaxDose = MortalityEvolution.InjectionsDoses[i];
-                BuildExcessPercentEvolutionChart(workSheet, 3 + i, iLastEvolutionRow, vaxDose, _DataColumn + 7 + i);
-            }
+            if (MortalityEvolution.InjectionsDoses.Length == 0)
+                BuildExcessPercentEvolutionChart(workSheet, 3, iLastEvolutionRow);
+            else
+                for (int i = 0; i < MortalityEvolution.InjectionsDoses.Length; i++)
+                {
+                    VaxDose vaxDose = MortalityEvolution.InjectionsDoses[i];
+                    BuildExcessPercentEvolutionChart(workSheet, 3 + i, iLastEvolutionRow, vaxDose, _DataColumn + 7 + i);
+                }
         }
 
         protected override string BaseName => $"{CountryCode}{MortalityEvolution.TimeMode}{MinAgeText}{MaxAgeText}{MortalityEvolution.GenderMode}{MortalityEvolution.Injections}";
@@ -99,12 +102,12 @@ namespace MortalityAnalyzer.Views
             AddInjectionsSerie(workSheet, evolutionChart, startDataRow, iLastRow, injectionsColumn, vaxDose);
             evolutionChart.SetPosition(_ChartsRow + iChart * _ChartsRowSpan, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
-            evolutionChart.Title.Text = JoinTitle($"Excess mortality by {TimeModeText.ToLower()}", CountryName, GenderModeText, AgeRange, injectionsColumn == 0 ? "" : InjectionsTitleText);
+            evolutionChart.Title.Text = JoinTitle($"Excess mortality by {TimeModeText.ToLower()}", CountryName, GenderModeText, AgeRange, vaxDose == VaxDose.None ? "" : InjectionsTitleText);
         }
 
         private void AddInjectionsSerie(ExcelWorksheet workSheet, ExcelChart evolutionChart, int startDataRow, int iLastRow, int injectionsColumn, VaxDose vaxDose, bool adjustMinMax = false)
         {
-            if (injectionsColumn > 0)
+            if (vaxDose != VaxDose.None)
             {
                 var vaxChart = evolutionChart.PlotArea.ChartTypes.Add(eChartType.LineMarkers);
                 var vaccinationSerie = vaxChart.Series.Add(workSheet.Cells[startDataRow, injectionsColumn, iLastRow, injectionsColumn], workSheet.Cells[startDataRow, _DataColumn + 1, iLastRow, _DataColumn + 1]);
@@ -116,7 +119,7 @@ namespace MortalityAnalyzer.Views
             }
         }
 
-        private void BuildExcessPercentEvolutionChart(ExcelWorksheet workSheet, int iChart, int iLastRow, VaxDose vaxDose, int injectionsColumn = 0)
+        private void BuildExcessPercentEvolutionChart(ExcelWorksheet workSheet, int iChart, int iLastRow, VaxDose vaxDose = VaxDose.None, int injectionsColumn = 0)
         {
             int startDataRow = 3;
             ExcelChart evolutionChart = workSheet.Drawings.AddChart($"ExcessPercentEvolutionChart{vaxDose}", eChartType.ColumnClustered);
