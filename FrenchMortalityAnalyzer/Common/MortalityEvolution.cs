@@ -234,6 +234,7 @@ ORDER BY {1}";
             return histogramResolution;
         }
         public DataTable ExcessHistogram { get; private set; }
+        public double StatisticalStandardDeviation { get; private set; }
         public double StandardDeviation { get; private set; }
         public int Population
         {
@@ -276,8 +277,9 @@ ORDER BY {1}";
             double[] standardizedDeaths = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(TimeField)) > MinYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
             double averageDeaths = standardizedDeaths.Average();
             DeathRate = averageDeaths / Population;
-            StandardDeviation = Math.Sqrt(DeathRate * (1 - DeathRate) * Population);
-            double sum = standardizedDeaths.Sum();
+            StatisticalStandardDeviation = Math.Sqrt(DeathRate * (1 - DeathRate) * Population);
+            double[] standardizedDeathsInRegression = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(TimeField)) > MinYearRegression && Convert.ToDouble(r.Field<object>(TimeField)) < MaxYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
+            StandardDeviation = Math.Sqrt(standardizedDeathsInRegression.Average(z => z * z) - Math.Pow(standardizedDeathsInRegression.Average(), 2));
             for (int i = 0; i < frequencies.Length; i++)
             {
                 DataRow dataRow = ExcessHistogram.NewRow();
@@ -285,7 +287,7 @@ ORDER BY {1}";
                 dataRow["Excess"] = x;
                 dataRow["Frequency"] = frequencies[i];
 
-                double y = Math.Exp(-0.5 * Math.Pow(x / StandardDeviation, 2)) / (Math.Sqrt(2 * Math.PI) * StandardDeviation) * resolution * values.Count();
+                double y = Math.Exp(-0.5 * Math.Pow(x / StatisticalStandardDeviation, 2)) / (Math.Sqrt(2 * Math.PI) * StatisticalStandardDeviation) * resolution * values.Count();
                 dataRow["Normal"] = y;
                 ExcessHistogram.Rows.Add(dataRow);
             }

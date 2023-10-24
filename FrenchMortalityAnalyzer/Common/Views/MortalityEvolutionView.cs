@@ -150,17 +150,22 @@ namespace MortalityAnalyzer.Views
             chart.Title.Text = JoinTitle("Death excess distribution", CountryName, GenderModeText, AgeRange);
 
             int iRow = workSheet.Dimension.End.Row + 4;
-            workSheet.Column(_DataColumn + 1).Width = 20;
-            workSheet.Cells[iRow, _DataColumn + 1].Value = "Standard deviation:";
-            ExcelStyle varianceCellstyle = workSheet.Cells[iRow, _DataColumn + 1].Style;
+            DisplayField(workSheet, iRow, "Statistical standard deviation:", MortalityEvolution.StatisticalStandardDeviation);
+            DisplayField(workSheet, iRow + 1, "Actual standard deviation:", MortalityEvolution.StandardDeviation);
+        }
+
+        private static void DisplayField(ExcelWorksheet workSheet, int iRow, string label, double value)
+        {
+            workSheet.Cells[iRow, _DataColumn + 1].Value = label;
+            ExcelStyle varianceCellstyle = workSheet.Cells[iRow, _DataColumn + 1, iRow, _DataColumn + 3].Style;
             varianceCellstyle.Border.BorderAround(ExcelBorderStyle.Thin);
             varianceCellstyle.Fill.PatternType = ExcelFillStyle.Solid;
             varianceCellstyle.Fill.BackgroundColor.SetColor(Color.Gray);
             varianceCellstyle.Font.Color.SetColor(Color.White);
             varianceCellstyle.Font.Bold = true;
-            workSheet.Cells[iRow, _DataColumn + 2].Value = MortalityEvolution.StandardDeviation;
-            workSheet.Cells[iRow, _DataColumn + 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-            workSheet.Cells[iRow, _DataColumn + 2].Style.Numberformat.Format = "0.0";
+            workSheet.Cells[iRow, _DataColumn + 4].Value = value;
+            workSheet.Cells[iRow, _DataColumn + 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+            workSheet.Cells[iRow, _DataColumn + 4].Style.Numberformat.Format = "0.0";
         }
 
         protected override void BuildHeader(ExcelWorksheet workSheet)
