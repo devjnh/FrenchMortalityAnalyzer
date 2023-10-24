@@ -50,7 +50,6 @@ namespace MortalityAnalyzer.Views
         {
             workSheet.Cells[3, _DataColumn + 1].LoadFromDataTable(MortalityEvolution.DataTable, true);
             workSheet.Cells[3, _DataColumn + 1].Value = TimePeriod;
-            workSheet.Column(2).AutoFit();
             //create a range for the table
             ExcelRange range = workSheet.Cells[3, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + MortalityEvolution.DataTable.Columns.Count];
 
@@ -70,6 +69,7 @@ namespace MortalityAnalyzer.Views
                 workSheet.Cells[3, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 2].Style.Numberformat.Format = yearFormat;
             workSheet.Cells[3, _DataColumn + 6].Value = "Excess %";
             workSheet.Cells[3, _DataColumn + 6, workSheet.Dimension.End.Row, _DataColumn + 6].Style.Numberformat.Format = "0.0%";
+            range.AutoFitColumns();
         }
         const int _ChartsColumn = 0;
         const int _ChartsRow = 2;

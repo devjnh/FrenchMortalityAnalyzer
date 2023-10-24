@@ -41,7 +41,7 @@ namespace MortalityAnalyzer.Views
         {
             ExcelWorksheet workSheet = CreateSheet(package);
             BuildHeader(workSheet);
-            BuildWeeklyEvolutionTable(workSheet);
+            BuildEvolutionTable(workSheet);
             BuildEvolutionChart(workSheet, _iStartData + 1, workSheet.Dimension.End.Row);
             if (MortalityEvolution.InjectionsDoses.Length == 0)
                 BuildExcessEvolutionChart(workSheet, 0, VaxDose.None);
@@ -72,10 +72,10 @@ namespace MortalityAnalyzer.Views
         const int _ChartsOffset = 25;
         int _iStartData = 3;
         int _DataColumn = 16;
-        private void BuildWeeklyEvolutionTable(ExcelWorksheet workSheet)
+        private void BuildEvolutionTable(ExcelWorksheet workSheet)
         {
             ExcelRangeBase range = workSheet.Cells[_iStartData, _DataColumn].LoadFromDataTable(MortalityEvolution.DataTable, true);
-            workSheet.Cells[_iStartData, _DataColumn].Value = "Week";
+            workSheet.Cells[_iStartData, _DataColumn].Value = MortalityEvolution.TimeMode;
 
             //add a table to the range
             ExcelTable tab = workSheet.Tables.Add(range, $"WeeklyTable{BaseName}");
@@ -83,7 +83,7 @@ namespace MortalityAnalyzer.Views
             tab.TableStyle = TableStyles.Light9;
 
             workSheet.Cells[_iStartData, _DataColumn, workSheet.Dimension.End.Row, _DataColumn].Style.Numberformat.Format = DateTimeFormatInfo.CurrentInfo.ShortDatePattern;
-            workSheet.Cells[_iStartData, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 5].Style.Numberformat.Format = "0.0";
+            workSheet.Cells[_iStartData, _DataColumn + 1, workSheet.Dimension.End.Row, workSheet.Dimension.End.Column].Style.Numberformat.Format = "0.0";
             workSheet.Cells[_iStartData, _DataColumn + 4].Value = "Excess %";
             workSheet.Cells[_iStartData, _DataColumn + 4, workSheet.Dimension.End.Row, _DataColumn + 4].Style.Numberformat.Format = "0.0%";
             range.AutoFitColumns();
