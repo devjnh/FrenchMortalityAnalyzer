@@ -136,14 +136,14 @@ namespace MortalityAnalyzer.Views
             int iStartRow = workSheet.Dimension.End.Row + 4;
             if (iStartRow < 30)
                 iStartRow = 30;
-            workSheet.Cells[iStartRow, _DataColumn + 1].LoadFromDataTable(MortalityEvolution.ExcessHistogram, true);
+            ExcelRangeBase rangeExcess = workSheet.Cells[iStartRow, _DataColumn + 1].LoadFromDataTable(MortalityEvolution.ExcessHistogram, true);
             workSheet.Cells[iStartRow, _DataColumn + 3, workSheet.Dimension.End.Row, _DataColumn + 3].Style.Numberformat.Format = "0.0";
-            ExcelRange rangeExcess = workSheet.Cells[iStartRow, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 3];
             ExcelTable tabExcess = workSheet.Tables.Add(rangeExcess, $"ExcessTable{BaseName}");
             tabExcess.TableStyle = TableStyles.Medium9;
             ExcelChart chart = workSheet.Drawings.AddChart("ExcessChart", eChartType.ColumnClustered);
             var excessSerie = chart.Series.Add(workSheet.Cells[iStartRow, _DataColumn + 2, workSheet.Dimension.End.Row, _DataColumn + 2], workSheet.Cells[iStartRow, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 1]);
-            var normalSerie = chart.Series.Add(workSheet.Cells[iStartRow, _DataColumn + 3, workSheet.Dimension.End.Row, _DataColumn + 3], workSheet.Cells[iStartRow, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 1]);
+            if (MortalityEvolution.StandardDeviation < MortalityEvolution.StatisticalStandardDeviation * 5)
+                chart.Series.Add(workSheet.Cells[iStartRow, _DataColumn + 3, workSheet.Dimension.End.Row, _DataColumn + 3], workSheet.Cells[iStartRow, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 1]);
             int iStartColumn = _ChartsColumn;
             chart.SetPosition(_ChartsRow + iChart * _ChartsRowSpan, 0, iStartColumn, _ChartsOffset);
             chart.SetSize(900, 500);
