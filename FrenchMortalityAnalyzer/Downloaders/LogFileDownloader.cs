@@ -13,7 +13,7 @@ namespace MortalityAnalyzer
     {
         public string LogFolder { get; }
         const string _BaseUrl = "https://www.data.gouv.fr/fr/datasets/fichier-des-personnes-decedees/";
-        public int MinYear { get; set; } = 2001;
+        public static int MinYear { get; set; } = 2010;
 
         public LogFileDownloader(string logFolder)
         {

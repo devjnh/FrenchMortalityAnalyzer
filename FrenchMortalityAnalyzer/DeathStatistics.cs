@@ -31,7 +31,7 @@ namespace MortalityAnalyzer
             string sexFilter = string.Empty;
             if (genderFilter != GenderFilter.All)
                 sexFilter = $" AND Gender = {(int)genderFilter}";
-            using (DbDataReader reader = DatabaseEngine.GetDataReader($@"SELECT DeathDate, Age, COUNT(*) FROM Deaths WHERE Age IS NOT NULL AND DeathDate > '2001-01-01' AND DeathDepartement NOT IN ('97', '98', '99'){sexFilter} GROUP BY DeathDate, Age ORDER BY DeathDate, Age"))
+            using (DbDataReader reader = DatabaseEngine.GetDataReader($@"SELECT DeathDate, Age, COUNT(*) FROM Deaths WHERE Age IS NOT NULL AND DeathDate > '{LogFileDownloader.MinYear}-01-01 00:00:00' AND DeathDepartement NOT IN ('97', '98', '99'){sexFilter} GROUP BY DeathDate, Age ORDER BY DeathDate, Age"))
             {
                 int year = -1;
                 while (reader.Read())
