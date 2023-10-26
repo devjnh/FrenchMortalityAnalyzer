@@ -26,8 +26,9 @@ namespace MortalityAnalyzer
         public bool DisplayRawDeaths { get; set; } = false;
         [Option('d', "Delay", Required = false, HelpText = "Delay in days between the last record and the max date used with the year to date mode. 30 days by default.")]
         public int ToDateDelay { get; set; } = 30;
-        [Option('i', "Injections", Required = false, HelpText = "Display Covid 19 vaccine injections D1/D2/D3/All/None. Default value None")]
-        public VaxDose Injections { get; set; }
+        [Option('i', "Injections", Required = false, HelpText = "Display Covid 19 vaccine injections. False if not specified")]
+        public bool DisplayInjections { get; set; }
+        public VaxDose Injections => DisplayInjections ? VaxDose.All : VaxDose.None;
 
 
         #region RollingEvolution
@@ -50,7 +51,7 @@ namespace MortalityAnalyzer
             mortalityEvolution.GenderMode = GenderMode;
             mortalityEvolution.DisplayRawDeaths = DisplayRawDeaths;
             mortalityEvolution.ToDateDelay = ToDateDelay;
-            mortalityEvolution.Injections = Injections;
+            mortalityEvolution.DisplayInjections = DisplayInjections;
             mortalityEvolution.RollingPeriod = RollingPeriod;
             mortalityEvolution.ZoomMinDate = ZoomMinDate;
             mortalityEvolution.ZoomMaxDate = ZoomMaxDate;

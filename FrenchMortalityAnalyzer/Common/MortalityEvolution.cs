@@ -16,7 +16,6 @@ namespace MortalityAnalyzer
         internal DatabaseEngine DatabaseEngine { get; set; }
         public DataTable DataTable { get; protected set; }
         public bool WholePeriods => TimeMode != TimeMode.YearToDate;
-        public bool DisplayInjections => Injections != VaxDose.None;
 
 
         public virtual void Generate()
