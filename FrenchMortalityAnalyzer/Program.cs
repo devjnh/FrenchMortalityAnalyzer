@@ -45,7 +45,7 @@ class Program
     private static DatabaseEngine GetDatabaseEngine(string dataFolder)
     {
         string databaseFile = Path.Combine(dataFolder, "FrenchMortality.db");
-        DatabaseEngine databaseEngine = new DatabaseEngine($"data source={databaseFile}", System.Data.SQLite.SQLiteFactory.Instance);
+        DatabaseEngine databaseEngine = new DatabaseEngine($"data source={databaseFile};Journal Mode=Off;Synchronous=Off", System.Data.SQLite.SQLiteFactory.Instance);
         databaseEngine.Connect();
         return databaseEngine;
     }
