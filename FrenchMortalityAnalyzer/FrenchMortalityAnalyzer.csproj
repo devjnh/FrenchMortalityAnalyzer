@@ -6,7 +6,7 @@
     <ImplicitUsings>false</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>10.0</LangVersion>
-    <FileVersion>2.0.0.0</FileVersion>
+    <FileVersion>2.0.1.0</FileVersion>
     <RootNamespace>MortalityAnalyzer</RootNamespace>
   </PropertyGroup>
 
