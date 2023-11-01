@@ -66,7 +66,7 @@ namespace MortalityAnalyzer.Views
             workSheet.Cells[3, _DataColumn + 4, workSheet.Dimension.End.Row, _DataColumn + 5].Style.Numberformat.Format = "0.0";
             string yearFormat = GetYearFormat(MortalityEvolution.TimeMode);
             if (!string.IsNullOrEmpty(yearFormat))
-                workSheet.Cells[3, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 2].Style.Numberformat.Format = yearFormat;
+                workSheet.Cells[3, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 1].Style.Numberformat.Format = yearFormat;
             workSheet.Cells[3, _DataColumn + 6].Value = "Excess %";
             workSheet.Cells[3, _DataColumn + 6, workSheet.Dimension.End.Row, _DataColumn + 6].Style.Numberformat.Format = "0.0%";
             range.AutoFitColumns();
