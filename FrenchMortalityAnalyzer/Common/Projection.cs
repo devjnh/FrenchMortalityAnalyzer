@@ -40,14 +40,15 @@ namespace MortalityAnalyzer.Common
                 dataRow["RelativeExcess"] = excess / baseLine;
             }
         }
-        public static void BuildProjection(DataTable dataTable, DateTime minDateRegression, DateTime maxDateRegression, int yearFractions)
+        public static void BuildProjection(DataTable dataTable, int minYearRegression, int maxYearRegression, int yearFractions)
         {
-            if (yearFractions == 1)
-                BuildLinearRegression(dataTable, minDateRegression, maxDateRegression);
+            if (dataTable.Columns[0].DataType != typeof(DateTime))
+                BuildProjection(dataTable, (double)minYearRegression, (double)maxYearRegression, yearFractions);
             else
-                BuildProjection(dataTable, minDateRegression.ToOADate(), maxDateRegression.ToOADate(), yearFractions);
+                BuildProjection(dataTable, new DateTime(minYearRegression, 1, 1).ToOADate(), new DateTime(maxYearRegression, 1, 1).ToOADate(), yearFractions);
         }
-        public static void BuildProjection(DataTable dataTable, double minDate, double maxDate, int yearFractions)
+
+        private static void BuildProjection(DataTable dataTable, double minDate, double maxDate, int yearFractions)
         {
             dataTable.Columns.Add("BaseLine", typeof(double));
             dataTable.Columns.Add("Excess", typeof(double));

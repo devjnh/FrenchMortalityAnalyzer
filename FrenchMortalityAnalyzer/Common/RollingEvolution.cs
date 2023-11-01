@@ -38,7 +38,7 @@ namespace MortalityAnalyzer
             deathStatistics.Columns["Standardized"].ColumnName = "Deaths";
             string[] columnNames = new string[] { "Deaths" }.Concat(InjectionsDoses.Select(d => d.ToString())).ToArray();
             DataTable = BuildRollingAverage(deathStatistics, columnNames);
-            Projection.BuildProjection(DataTable, new DateTime(MinYearRegression, 1, 1), new DateTime(MaxYearRegression, 1, 1), TimeMode == TimeMode.Week ? 25 : 100);
+            Projection.BuildProjection(DataTable, MinYearRegression, MaxYearRegression, TimeMode == TimeMode.Week ? 25 : 100);
             foreach (VaxDose vaxDose in InjectionsDoses)
                 DataTable.Columns[vaxDose.ToString()].SetOrdinal(DataTable.Columns.Count - 1);
             MinMax();
