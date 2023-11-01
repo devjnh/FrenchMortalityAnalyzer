@@ -23,14 +23,14 @@ namespace MortalityAnalyzer
             AdjustMinYearRegression();
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
-            string query = string.Format(GetQueryTemplate(), conditionBuilder, TimeField);
+            string query = string.Format(GetQueryTemplate(), conditionBuilder, TimeField, TimeField);
             DataTable deathStatistics = DatabaseEngine.GetDataTable(query);
             Implementation.CleanDataTable(deathStatistics);
             deathStatistics.Rows.Remove(deathStatistics.Rows[deathStatistics.Rows.Count - 1]);
 
             if (DisplayInjections)
             {
-                query = string.Format(Query_Vaccination, conditionBuilder, TimeField, InjectionsFields);
+                query = string.Format(Query_Vaccination, conditionBuilder, TimeField, InjectionsFields, TimeField);
                 DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
                 LeftJoin(deathStatistics, vaccinationStatistics);
             }

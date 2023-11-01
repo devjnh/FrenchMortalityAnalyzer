@@ -42,6 +42,7 @@ namespace MortalityAnalyzer.Views
             {
                 TimeMode.Semester => "0.0",
                 TimeMode.Quarter => "0.00",
+                TimeMode.Month => DateTimeFormatInfo.CurrentInfo.YearMonthPattern,
                 _ => "",
             };
         }
@@ -109,7 +110,7 @@ namespace MortalityAnalyzer.Views
         {
             if (vaxDose != VaxDose.None)
             {
-                var vaxChart = evolutionChart.PlotArea.ChartTypes.Add(eChartType.LineMarkers);
+                var vaxChart = evolutionChart.PlotArea.ChartTypes.Add(MortalityEvolution.TimeMode == TimeMode.Month ? eChartType.Line : eChartType.LineMarkers);
                 var vaccinationSerie = vaxChart.Series.Add(workSheet.Cells[startDataRow, injectionsColumn, iLastRow, injectionsColumn], workSheet.Cells[startDataRow, _DataColumn + 1, iLastRow, _DataColumn + 1]);
                 vaccinationSerie.Header = $"{vaxDose} injections";
                 vaxChart.XAxis.Crosses = eCrosses.Min;

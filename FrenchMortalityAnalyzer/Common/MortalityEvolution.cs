@@ -26,8 +26,8 @@ namespace MortalityAnalyzer
 
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
-            string query = string.Format(GetQueryTemplate(), conditionBuilder, TimeField);
-            DataTable = DatabaseEngine.GetDataTable(query);
+            string query = string.Format(GetQueryTemplate(), conditionBuilder, SqlTimeField, TimeField);
+            DataTable = GetDataTable(query);
             if (TimeMode == TimeMode.DeltaYear)
                 DataTable.Rows.Remove(DataTable.Rows[0]);
             if (WholePeriods)
@@ -46,6 +46,19 @@ namespace MortalityAnalyzer
             MinMax();
         }
 
+        private DataTable GetDataTable(string query)
+        {
+            if (TimeMode != TimeMode.Month)
+                return DatabaseEngine.GetDataTable(query);
+
+            // Force time field to DateTime
+            DataTable dataTable = new DataTable();
+            dataTable.Columns.Add(TimeField, typeof(DateTime));
+            DatabaseEngine.FillDataTable(query, dataTable);
+
+            return dataTable;
+        }
+
         protected void RetrieveLastDay()
         {
             LastDay = Convert.ToDateTime(DatabaseEngine.GetValue($"SELECT MAX(Date) FROM {DatabaseEngine.GetTableName(typeof(DeathStatistic))}")).AddDays(-ToDateDelay);
@@ -53,14 +66,14 @@ namespace MortalityAnalyzer
 
 
         protected const string Query_Vaccination = @"SELECT {1}, {2} FROM VaxStatistics{0}
-GROUP BY {1}
-ORDER BY {1}";
+GROUP BY {3}
+ORDER BY {3}";
         void BuildVaccinationStatistics()
         {
             StringBuilder conditionBuilder = new StringBuilder();
             AddConditions(conditionBuilder);
-            string query = string.Format(Query_Vaccination, conditionBuilder, TimeField, InjectionsFields);
-            DataTable vaccinationStatistics = DatabaseEngine.GetDataTable(query);
+            string query = string.Format(Query_Vaccination, conditionBuilder, SqlTimeField, InjectionsFields, TimeField);
+            DataTable vaccinationStatistics = GetDataTable(query);
 
             LeftJoin(DataTable, vaccinationStatistics);
         }
@@ -119,6 +132,8 @@ ORDER BY {1}";
             {
                 switch (TimeMode)
                 {
+                    case TimeMode.Month:
+                        return 12;
                     case TimeMode.Quarter:
                         return 4;
                     case TimeMode.Semester:
@@ -149,11 +164,18 @@ ORDER BY {1}";
 
         private int PeriodInMonths => 12 / PeriodsInYear;
 
-        public double GetPeriodLength(double period)
+        public double GetPeriodLength(object time)
         {
-            int year = (int)period;
-            int month = TimeMode == TimeMode.DeltaYear ? 7 : (int)((period - year) * 12) + 1;
-            DateTime periodStart = new DateTime(year, month, 1);
+            DateTime periodStart;
+            if (time is DateTime)
+                periodStart = (DateTime)time;
+            else
+            {
+                double period = Convert.ToDouble(time);
+                int year = (int)period;
+                int month = TimeMode == TimeMode.DeltaYear ? 7 : (int)((period - year) * 12) + 1;
+                periodStart = new DateTime(year, month, 1);
+            }
             DateTime periodEnd = periodStart.AddMonths(PeriodInMonths);
             double days = (periodEnd - periodStart).TotalDays;
             return days;
@@ -183,12 +205,23 @@ ORDER BY {1}";
                     case TimeMode.DeltaYear: return nameof(DeathStatistic.DeltaYear);
                     case TimeMode.Semester: return nameof(DeathStatistic.Semester);
                     case TimeMode.Quarter: return nameof(DeathStatistic.Quarter);
+                    case TimeMode.Month: return nameof(TimeMode.Month);
                     case TimeMode.YearToDate:
                     case TimeMode.Year: return nameof(DeathStatistic.Year);
                     case TimeMode.Week: return nameof(DeathStatistic.Week);
                     case TimeMode.Day: return nameof(DeathStatistic.Date);
                     default: throw new ArgumentOutOfRangeException($"The time mode {TimeMode} is  not supported!");
                 }
+            }
+        }
+        public string SqlTimeField
+        {
+            get
+            {
+                if (TimeMode == TimeMode.Month)
+                    return $"strftime('%Y-%m-1 00:00:00', {nameof(DeathStatistic.Date)}) AS {TimeField}";
+                else
+                    return TimeField;
             }
         }
 
@@ -235,7 +268,7 @@ ORDER BY {1}";
 
         void BuildExcessHistogram()
         {
-            var values = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(TimeField)) > MinYearRegression).Select(r => r.Field<double>("Excess")).ToArray();
+            var values = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) > MinYearRegression).Select(r => r.Field<double>("Excess")).ToArray();
             double max = values.Max();
             double min = values.Min();
             double resolution = GetHistogramResolution(max - min, 15);
@@ -252,11 +285,11 @@ ORDER BY {1}";
             ExcessHistogram.Columns.Add("Excess", typeof(double));
             ExcessHistogram.Columns.Add("Frequency", typeof(double));
             ExcessHistogram.Columns.Add("Normal", typeof(double));
-            double[] standardizedDeaths = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(TimeField)) > MinYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
+            double[] standardizedDeaths = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) > MinYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
             double averageDeaths = standardizedDeaths.Average();
             DeathRate = averageDeaths / Population;
             StatisticalStandardDeviation = Math.Sqrt(DeathRate * (1 - DeathRate) * Population);
-            double[] standardizedDeathsInRegression = DataTable.AsEnumerable().Where(r => Convert.ToDouble(r.Field<object>(TimeField)) > MinYearRegression && Convert.ToDouble(r.Field<object>(TimeField)) < MaxYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
+            double[] standardizedDeathsInRegression = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) > MinYearRegression && ToYear(r.Field<object>(TimeField)) < MaxYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
             StandardDeviation = Math.Sqrt(standardizedDeathsInRegression.Average(z => z * z) - Math.Pow(standardizedDeathsInRegression.Average(), 2));
             for (int i = 0; i < frequencies.Length; i++)
             {
@@ -269,6 +302,13 @@ ORDER BY {1}";
                 dataRow["Normal"] = y;
                 ExcessHistogram.Rows.Add(dataRow);
             }
+        }
+
+        double ToYear(object time)
+        {
+            if (TimeMode == TimeMode.Month)
+                return ((DateTime)time).Year;
+            return Convert.ToDouble(time);
         }
         protected void MinMax()
         {
@@ -294,6 +334,6 @@ ORDER BY {1}";
         public SpecificImplementation Implementation => _Implementation;
 
     }
-    public enum TimeMode { Year, DeltaYear, Semester, Quarter, YearToDate, Week, Day }
+    public enum TimeMode { Year, DeltaYear, Semester, Quarter, Month, YearToDate, Week, Day }
     public enum VaxDose { None, D1, D2, D3, All}
 }

@@ -27,7 +27,7 @@ namespace MortalityAnalyzer
             return mortalityEvolution;
         }
 
-        private bool IsNormalMode => TimeMode <= TimeMode.Quarter;
+        private bool IsNormalMode => TimeMode <= TimeMode.Month;
 
         internal BaseEvolutionView GetView()
         {
