@@ -145,33 +145,9 @@ ORDER BY {1}";
             AddCondition($"Gender = {(int)GenderMode}", conditionBuilder);
         }
 
-        public double StandardizedPeriodLength => 365 * PeriodInFractionOfYear;
+        public double StandardizedPeriodLength => 365.0 / PeriodsInYear;
 
-        private double PeriodInFractionOfYear
-        {
-            get
-            {
-                return TimeMode switch
-                {
-                    TimeMode.Semester => 0.5,
-                    TimeMode.Quarter => 0.25,
-                    _ => 1.0,
-                };
-            }
-        }
-
-        private int PeriodInMonths
-        {
-            get
-            {
-                return TimeMode switch
-                {
-                    TimeMode.Semester => 6,
-                    TimeMode.Quarter => 3,
-                    _ => 12
-                };
-            }
-        }
+        private int PeriodInMonths => 12 / PeriodsInYear;
 
         public double GetPeriodLength(double period)
         {
