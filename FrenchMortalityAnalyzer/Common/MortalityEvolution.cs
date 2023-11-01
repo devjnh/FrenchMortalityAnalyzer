@@ -173,7 +173,7 @@ ORDER BY {3}";
             {
                 double period = Convert.ToDouble(time);
                 int year = (int)period;
-                int month = TimeMode == TimeMode.DeltaYear ? 7 : (int)((period - year) * 12) + 1;
+                int month = (int)((period - year) * 12) + 1;
                 periodStart = new DateTime(year, month, 1);
             }
             DateTime periodEnd = periodStart.AddMonths(PeriodInMonths);
