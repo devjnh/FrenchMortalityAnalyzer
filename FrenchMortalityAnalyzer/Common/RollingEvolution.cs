@@ -69,11 +69,6 @@ namespace MortalityAnalyzer
 
             return dataTable;
         }
-
-        protected override string TimeValueToText(object timeValue)
-        {
-            return $"#{Convert.ToDateTime(timeValue).ToString(CultureInfo.InvariantCulture)}#";
-        }
     }
     public class FieldFilter
     {

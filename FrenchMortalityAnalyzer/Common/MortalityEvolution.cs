@@ -82,7 +82,10 @@ ORDER BY {1}";
 
         protected virtual string TimeValueToText(object timeValue)
         {
-            return (Convert.ToDouble(timeValue)).ToString(CultureInfo.InvariantCulture);
+            if (timeValue is DateTime)
+                return $"#{((DateTime)timeValue).ToString(CultureInfo.InvariantCulture)}#";
+            else
+                return (Convert.ToDouble(timeValue)).ToString(CultureInfo.InvariantCulture);
         }
 
         public double MaxExcess { get; protected set; }
