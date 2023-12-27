@@ -40,7 +40,7 @@ namespace MortalityAnalyzer
         public DateTime ZoomMaxDate { get; set; } = new DateTime(2022, 7, 1);
         #endregion
 
-        protected void CopyTo(MortalityEvolution mortalityEvolution)
+        public void CopyTo(MortalityEvolution mortalityEvolution)
         {
             CopyTo((Options)mortalityEvolution);
             mortalityEvolution.MinYearRegression = MinYearRegression;
