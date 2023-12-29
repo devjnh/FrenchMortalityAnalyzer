@@ -29,6 +29,8 @@ namespace MortalityAnalyzer
         [Option('i', "Injections", Required = false, HelpText = "Display Covid 19 vaccine injections. False if not specified")]
         public bool DisplayInjections { get; set; }
         public VaxDose Injections => DisplayInjections ? VaxDose.All : VaxDose.None;
+        [Option("ExcessSince", Required = false, HelpText = "Calculate excess since the specified date. 2021-07-01 by default")]
+        public DateTime ExcessSince { get; set; } = new DateTime(2021, 07, 1);
 
 
         #region RollingEvolution

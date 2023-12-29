@@ -162,6 +162,9 @@ namespace MortalityAnalyzer.Views
             int iRow = workSheet.Dimension.End.Row + 4;
             DisplayField(workSheet, iRow, "Statistical standard deviation:", MortalityEvolution.StatisticalStandardDeviation);
             DisplayField(workSheet, iRow + 1, "Actual standard deviation:", MortalityEvolution.StandardDeviation);
+            DisplayField(workSheet, iRow + 2, "Total excess:", MortalityEvolution.TotalExcess);
+            DisplayField(workSheet, iRow + 3, "Relative excess:", MortalityEvolution.RelativeExcess);
+            workSheet.Cells[iRow + 3, _DataColumn + 4].Style.Numberformat.Format = "0.0%";
         }
 
         private static void DisplayField(ExcelWorksheet workSheet, int iRow, string label, double value)

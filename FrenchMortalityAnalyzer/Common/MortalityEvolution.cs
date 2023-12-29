@@ -16,6 +16,8 @@ namespace MortalityAnalyzer
         internal DatabaseEngine DatabaseEngine { get; set; }
         public DataTable DataTable { get; protected set; }
         public bool WholePeriods => TimeMode != TimeMode.YearToDate;
+        public double TotalExcess { get; set; }
+        public double RelativeExcess { get; set; }
 
 
         public virtual void Generate()
@@ -44,6 +46,8 @@ namespace MortalityAnalyzer
             if (DisplayInjections)
                 BuildVaccinationStatistics();
             MinMax();
+            TotalExcess = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) >= ToYear(ExcessSince)).Select(r => r.Field<double>("Excess")).Sum();
+            RelativeExcess = TotalExcess / DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) >= ToYear(ExcessSince)).Select(r => r.Field<double>("Standardized")).Sum();
         }
 
         private DataTable GetDataTable(string query)
@@ -306,8 +310,8 @@ ORDER BY {3}";
 
         double ToYear(object time)
         {
-            if (TimeMode == TimeMode.Month)
-                return ((DateTime)time).Year;
+            if (time is DateTime)
+                return ((DateTime)time).Year + (((DateTime)time).Month - 1) / 12.0;
             return Convert.ToDouble(time);
         }
         protected void MinMax()
