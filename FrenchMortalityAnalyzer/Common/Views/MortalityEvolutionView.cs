@@ -162,12 +162,14 @@ namespace MortalityAnalyzer.Views
             int iRow = workSheet.Dimension.End.Row + 4;
             DisplayField(workSheet, iRow, "Statistical standard deviation:", MortalityEvolution.StatisticalStandardDeviation);
             DisplayField(workSheet, iRow + 1, "Actual standard deviation:", MortalityEvolution.StandardDeviation);
-            DisplayField(workSheet, iRow + 2, "Total excess:", MortalityEvolution.TotalExcess);
-            DisplayField(workSheet, iRow + 3, "Relative excess:", MortalityEvolution.RelativeExcess);
-            workSheet.Cells[iRow + 3, _DataColumn + 4].Style.Numberformat.Format = "0.0%";
+            DisplayField(workSheet, iRow + 2, "Excess since:", MortalityEvolution.ExcessSince, DateTimeFormatInfo.CurrentInfo.YearMonthPattern);
+            DisplayField(workSheet, iRow + 3, "Total excess:", MortalityEvolution.TotalExcess);
+            DisplayField(workSheet, iRow + 4, "Relative excess:", MortalityEvolution.RelativeExcess, "0.0%");
+            DisplayField(workSheet, iRow + 5, "Death rate/10000:", MortalityEvolution.DeathRate * 10000, "0.00");
+            DisplayField(workSheet, iRow + 6, "Excess rate/10000:", MortalityEvolution.ExcessRate * 10000, "0.00");
         }
 
-        private static void DisplayField(ExcelWorksheet workSheet, int iRow, string label, double value)
+        private static void DisplayField(ExcelWorksheet workSheet, int iRow, string label, object value, string format = "0.0")
         {
             workSheet.Cells[iRow, _DataColumn + 1].Value = label;
             ExcelStyle varianceCellstyle = workSheet.Cells[iRow, _DataColumn + 1, iRow, _DataColumn + 3].Style;
@@ -178,7 +180,7 @@ namespace MortalityAnalyzer.Views
             varianceCellstyle.Font.Bold = true;
             workSheet.Cells[iRow, _DataColumn + 4].Value = value;
             workSheet.Cells[iRow, _DataColumn + 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-            workSheet.Cells[iRow, _DataColumn + 4].Style.Numberformat.Format = "0.0";
+            workSheet.Cells[iRow, _DataColumn + 4].Style.Numberformat.Format = format;
         }
 
         protected override void BuildHeader(ExcelWorksheet workSheet)

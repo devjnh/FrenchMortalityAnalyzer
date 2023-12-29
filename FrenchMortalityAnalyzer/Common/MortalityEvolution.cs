@@ -18,6 +18,7 @@ namespace MortalityAnalyzer
         public bool WholePeriods => TimeMode != TimeMode.YearToDate;
         public double TotalExcess { get; set; }
         public double RelativeExcess { get; set; }
+        public double ExcessRate { get; set; }
 
 
         public virtual void Generate()
@@ -46,8 +47,10 @@ namespace MortalityAnalyzer
             if (DisplayInjections)
                 BuildVaccinationStatistics();
             MinMax();
-            TotalExcess = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) >= ToYear(ExcessSince)).Select(r => r.Field<double>("Excess")).Sum();
-            RelativeExcess = TotalExcess / DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) >= ToYear(ExcessSince)).Select(r => r.Field<double>("Standardized")).Sum();
+            EnumerableRowCollection<DataRow> dataRows = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) >= ToYear(ExcessSince));
+            TotalExcess = dataRows.Select(r => r.Field<double>("Excess")).Sum();
+            ExcessRate = dataRows.Select(r => r.Field<double>("Excess")).Average() / Population;
+            RelativeExcess = TotalExcess / dataRows.Select(r => r.Field<double>("Standardized")).Sum();
         }
 
         private DataTable GetDataTable(string query)
@@ -268,7 +271,7 @@ ORDER BY {3}";
         }
 
 
-        double DeathRate { get; set; }
+        public double DeathRate { get; set; }
 
         void BuildExcessHistogram()
         {
