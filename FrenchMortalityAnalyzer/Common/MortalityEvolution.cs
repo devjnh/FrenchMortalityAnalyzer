@@ -17,6 +17,7 @@ namespace MortalityAnalyzer
         public DataTable DataTable { get; protected set; }
         public bool WholePeriods => TimeMode != TimeMode.YearToDate;
         public double TotalExcess { get; set; }
+        public double ExcessPerYear { get; set; }
         public double RelativeExcess { get; set; }
         public double ExcessRate { get; set; }
 
@@ -47,9 +48,11 @@ namespace MortalityAnalyzer
             if (DisplayInjections)
                 BuildVaccinationStatistics();
             MinMax();
-            EnumerableRowCollection<DataRow> dataRows = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) >= ToYear(ExcessSince));
+            DataRow[] dataRows = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) >= ToYear(ExcessSince)).ToArray();
+            double periodLength = dataRows.Length / PeriodsInYear;
             TotalExcess = dataRows.Select(r => r.Field<double>("Excess")).Sum();
-            ExcessRate = dataRows.Select(r => r.Field<double>("Excess")).Average() / Population;
+            ExcessPerYear = TotalExcess / periodLength;
+            ExcessRate = dataRows.Select(r => r.Field<double>("Excess")).Average() / Population * PeriodsInYear;
             RelativeExcess = TotalExcess / dataRows.Select(r => r.Field<double>("Standardized")).Sum();
         }
 
@@ -294,7 +297,7 @@ ORDER BY {3}";
             ExcessHistogram.Columns.Add("Normal", typeof(double));
             double[] standardizedDeaths = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) > MinYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
             double averageDeaths = standardizedDeaths.Average();
-            DeathRate = averageDeaths / Population;
+            DeathRate = averageDeaths / Population * PeriodsInYear;
             StatisticalStandardDeviation = Math.Sqrt(DeathRate * (1 - DeathRate) * Population);
             double[] standardizedDeathsInRegression = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) > MinYearRegression && ToYear(r.Field<object>(TimeField)) < MaxYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
             StandardDeviation = Math.Sqrt(standardizedDeathsInRegression.Average(z => z * z) - Math.Pow(standardizedDeathsInRegression.Average(), 2));

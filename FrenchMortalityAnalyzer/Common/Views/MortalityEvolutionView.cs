@@ -164,9 +164,10 @@ namespace MortalityAnalyzer.Views
             DisplayField(workSheet, iRow + 1, "Actual standard deviation:", MortalityEvolution.StandardDeviation);
             DisplayField(workSheet, iRow + 2, "Excess since:", MortalityEvolution.ExcessSince, DateTimeFormatInfo.CurrentInfo.YearMonthPattern);
             DisplayField(workSheet, iRow + 3, "Total excess:", MortalityEvolution.TotalExcess);
-            DisplayField(workSheet, iRow + 4, "Relative excess:", MortalityEvolution.RelativeExcess, "0.0%");
-            DisplayField(workSheet, iRow + 5, "Death rate/10000:", MortalityEvolution.DeathRate * 10000, "0.00");
-            DisplayField(workSheet, iRow + 6, "Excess rate/10000:", MortalityEvolution.ExcessRate * 10000, "0.00");
+            DisplayField(workSheet, iRow + 4, "Excess per year:", MortalityEvolution.ExcessPerYear);
+            DisplayField(workSheet, iRow + 5, "Relative excess:", MortalityEvolution.RelativeExcess, "0.0%");
+            DisplayField(workSheet, iRow + 6, "Death rate/100000/year:", MortalityEvolution.DeathRate * 100000, "0.00");
+            DisplayField(workSheet, iRow + 7, "Excess rate/100000/year:", MortalityEvolution.ExcessRate * 100000, "0.00");
         }
 
         private static void DisplayField(ExcelWorksheet workSheet, int iRow, string label, object value, string format = "0.0")
