@@ -160,14 +160,15 @@ namespace MortalityAnalyzer.Views
             chart.Title.Text = JoinTitle("Death excess distribution", CountryName, GenderModeText, AgeRange);
 
             int iRow = workSheet.Dimension.End.Row + 4;
-            DisplayField(workSheet, iRow, "Statistical standard deviation:", MortalityEvolution.StatisticalStandardDeviation);
-            DisplayField(workSheet, iRow + 1, "Actual standard deviation:", MortalityEvolution.StandardDeviation);
-            DisplayField(workSheet, iRow + 2, "Excess since:", MortalityEvolution.ExcessSince, DateTimeFormatInfo.CurrentInfo.YearMonthPattern);
-            DisplayField(workSheet, iRow + 3, "Total excess:", MortalityEvolution.TotalExcess);
-            DisplayField(workSheet, iRow + 4, "Excess per year:", MortalityEvolution.ExcessPerYear);
-            DisplayField(workSheet, iRow + 5, "Relative excess:", MortalityEvolution.RelativeExcess, "0.0%");
-            DisplayField(workSheet, iRow + 6, "Death rate/100000/year:", MortalityEvolution.DeathRate * 100000, "0.00");
-            DisplayField(workSheet, iRow + 7, "Excess rate/100000/year:", MortalityEvolution.ExcessRate * 100000, "0.00");
+            DisplayField(workSheet, iRow++, "Statistical standard deviation:", MortalityEvolution.StatisticalStandardDeviation);
+            DisplayField(workSheet, iRow++, "Actual standard deviation:", MortalityEvolution.StandardDeviation);
+            DisplayField(workSheet, iRow++, "Population:", MortalityEvolution.Population, "#,0");
+            DisplayField(workSheet, iRow++, "Death rate/100000/year:", MortalityEvolution.DeathRate * 100000, "0.00");
+            DisplayField(workSheet, iRow++, "Excess since:", MortalityEvolution.ExcessSince, DateTimeFormatInfo.CurrentInfo.YearMonthPattern);
+            DisplayField(workSheet, iRow++, "Total excess:", MortalityEvolution.TotalExcess);
+            DisplayField(workSheet, iRow++, "Excess per year:", MortalityEvolution.ExcessPerYear);
+            DisplayField(workSheet, iRow++, "Relative excess:", MortalityEvolution.RelativeExcess, "0.0%");
+            DisplayField(workSheet, iRow++, "Excess rate/100000/year:", MortalityEvolution.ExcessRate * 100000, "0.00");
         }
 
         private static void DisplayField(ExcelWorksheet workSheet, int iRow, string label, object value, string format = "0.0")
