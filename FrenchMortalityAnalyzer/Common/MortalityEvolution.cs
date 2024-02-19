@@ -49,7 +49,7 @@ namespace MortalityAnalyzer
                 BuildVaccinationStatistics();
             MinMax();
             DataRow[] dataRows = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) >= ToYear(ExcessSince)).ToArray();
-            double periodLength = dataRows.Length / PeriodsInYear;
+            double periodLength = (double)dataRows.Length / PeriodsInYear;
             TotalExcess = dataRows.Select(r => r.Field<double>("Excess")).Sum();
             ExcessPerYear = TotalExcess / periodLength;
             ExcessRate = dataRows.Select(r => r.Field<double>("Excess")).Average() / Population * PeriodsInYear;
