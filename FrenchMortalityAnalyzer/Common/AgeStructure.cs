@@ -36,7 +36,14 @@ namespace MortalityAnalyzer.Common
         public int GetPopulation(int year, int age, string country, GenderFilter genderFilter = GenderFilter.All)
         {
             int ageLowerBound = age <= MaxAge ? age : MaxAge;
-            DataRow[] rows = DataTable.Select($"Year={year} AND Age={ageLowerBound} AND Gender={(int)genderFilter} AND Country = '{country}'");
+            DataRow[] rows;
+            int decreased = 0;
+            do
+            {
+                rows = DataTable.Select($"Year={year - decreased} AND Age={ageLowerBound} AND Gender={(int)genderFilter} AND Country = '{country}'");
+                if (decreased++ > 5)
+                    return -1;
+            } while (rows.Length == 0);
             return rows.Length == 1 ? (int)rows[0][nameof(AgeStatistic.Population)] : -1;
         }
         public int GetPopulation(int year, int minAge, int maxAge, string country, GenderFilter genderFilter = GenderFilter.All)
