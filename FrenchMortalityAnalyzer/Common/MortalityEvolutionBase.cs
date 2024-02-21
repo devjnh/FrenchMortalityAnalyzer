@@ -57,6 +57,7 @@ namespace MortalityAnalyzer
             mortalityEvolution.RollingPeriod = RollingPeriod;
             mortalityEvolution.ZoomMinDate = ZoomMinDate;
             mortalityEvolution.ZoomMaxDate = ZoomMaxDate;
+            mortalityEvolution.ExcessSince = ExcessSince;
         }
     }
 }
