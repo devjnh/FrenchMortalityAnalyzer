@@ -18,9 +18,10 @@ namespace MortalityAnalyzer
         string[] _Urls = new string[]
         {
             "https://www.insee.fr/fr/statistiques/fichier/6327222/fm_t6.xlsx",
-            "https://www.insee.fr/fr/statistiques/fichier/6688661/Pyra2023.xlsx",
-            "https://www.insee.fr/fr/statistiques/fichier/6688661/Pyra2022.xlsx",
-            "https://www.insee.fr/fr/statistiques/fichier/6688661/Pyra2021.xlsx",
+            "https://www.insee.fr/fr/statistiques/fichier/7746192/Pyra2024.xlsx",
+            "https://www.insee.fr/fr/statistiques/fichier/7746192/Pyra2023.xlsx",
+            "https://www.insee.fr/fr/statistiques/fichier/7746192/Pyra2022.xlsx",
+            "https://www.insee.fr/fr/statistiques/fichier/7746192/Pyra2021.xlsx",
             "https://www.insee.fr/fr/statistiques/fichier/6688661/Pyra2020.xlsx",
         };
         public void DownloadMissingFiles()
