@@ -1,4 +1,5 @@
-﻿using MortalityAnalyzer.Downloaders;
+﻿using MortalityAnalyzer.Common;
+using MortalityAnalyzer.Downloaders;
 using MortalityAnalyzer.Model;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace MortalityAnalyzer.Parser
     internal abstract class CsvParser
     {
         public DatabaseEngine DatabaseEngine { get; set; }
+        public IProgress Progress { get; set; } = NullProgress.Instance;
 
         public char Separator { get; set; } = ',';
 
@@ -24,6 +26,7 @@ namespace MortalityAnalyzer.Parser
             DatabaseEngine.Prepare(CreateDataTable());
             using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
+                Progress.NotifyStart(fileStream.Length);
                 using (StreamReader textReader = new StreamReader(fileStream))
                 {
                     string line = textReader.ReadLine();
@@ -36,8 +39,10 @@ namespace MortalityAnalyzer.Parser
                         object entry = GetEntry(line.Split(Separator));
                         if (entry != null)
                             DatabaseEngine.Insert(entry);
+                        Progress.NotifyProgress(fileStream.Position);
                     }
                 }
+                Progress.NotifyEnd();
             }
             DatabaseEngine.FinishInsertion();
         }
