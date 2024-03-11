@@ -97,6 +97,8 @@ namespace MortalityAnalyzer.Common
             {
                 DateTime dateTime = (DateTime)value;
                 DateTime year = new DateTime(dateTime.Year, 1, 1);
+                if (yearFractions == 12)
+                    return dateTime.Month - 1;
                 int totalDays = (int)(year.AddYears(1) - year).TotalDays;
                 int fraction = (int)((double)(dateTime.DayOfYear - 1) / totalDays * yearFractions);
                 if (fraction >= yearFractions)
