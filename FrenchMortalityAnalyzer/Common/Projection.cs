@@ -9,11 +9,7 @@ namespace MortalityAnalyzer.Common
 {
     public class Projection
     {
-        public static void BuildLinearRegression(DataTable dataTable, DateTime minDateRegression, DateTime maxDateRegression)
-        {
-            BuildLinearRegression(dataTable, minDateRegression.ToOADate(), maxDateRegression.ToOADate());
-        }
-        public static void BuildLinearRegression(DataTable dataTable, double minYearRegression, double maxYearRegression)
+        public static void BuildProjection2(DataTable dataTable, double minYearRegression, double maxYearRegression, int yearFractions)
         {
             List<double> xVals = new List<double>();
             List<double> yVals = new List<double>();
@@ -27,13 +23,28 @@ namespace MortalityAnalyzer.Common
             }
             double rsquared, yintercept, slope;
             LinearRegression(xVals, yVals, 0, xVals.Count, out rsquared, out yintercept, out slope);
+            double[] deltas = new double[yearFractions];
+            double[] counts = new double[yearFractions];
+            foreach (DataRow dataRow in dataTable.Rows)
+            {
+                double year = TimeToDouble(dataRow[0]);
+                int yearFraction = GetYearFraction(dataRow[0], yearFractions);
+                double baseLine = yintercept + slope * year;
+                deltas[yearFraction] += Convert.ToDouble(dataRow[1]) - baseLine;
+                counts[yearFraction]++;
+            }
+            for (int i = 0; i < deltas.Length; i++)
+                deltas[i] = deltas[i] / counts[i];
+            double averageDelta = deltas.Average();
+
             dataTable.Columns.Add("BaseLine", typeof(double));
             dataTable.Columns.Add("Excess", typeof(double));
             dataTable.Columns.Add("RelativeExcess", typeof(double));
             foreach (DataRow dataRow in dataTable.Rows)
             {
                 double year = TimeToDouble(dataRow[0]);
-                double baseLine = yintercept + slope * year;
+                int yearFraction = GetYearFraction(dataRow[0], yearFractions);
+                double baseLine = yintercept + slope * year + deltas[yearFraction] - averageDelta;
                 dataRow["BaseLine"] = baseLine;
                 double excess = Convert.ToDouble(dataRow[1]) - baseLine;
                 dataRow["Excess"] = excess;
@@ -43,9 +54,9 @@ namespace MortalityAnalyzer.Common
         public static void BuildProjection(DataTable dataTable, int minYearRegression, int maxYearRegression, int yearFractions)
         {
             if (dataTable.Columns[0].DataType != typeof(DateTime))
-                BuildProjection(dataTable, (double)minYearRegression, (double)maxYearRegression, yearFractions);
+                BuildProjection2(dataTable, (double)minYearRegression, (double)maxYearRegression, yearFractions);
             else
-                BuildProjection(dataTable, new DateTime(minYearRegression, 1, 1).ToOADate(), new DateTime(maxYearRegression, 1, 1).ToOADate(), yearFractions);
+                BuildProjection2(dataTable, new DateTime(minYearRegression, 1, 1).ToOADate(), new DateTime(maxYearRegression, 1, 1).ToOADate(), yearFractions);
         }
 
         private static void BuildProjection(DataTable dataTable, double minDate, double maxDate, int yearFractions)
