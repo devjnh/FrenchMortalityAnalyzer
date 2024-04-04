@@ -297,8 +297,9 @@ ORDER BY {3}";
             ExcessHistogram.Columns.Add("Normal", typeof(double));
             double[] standardizedDeaths = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) > MinYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
             double averageDeaths = standardizedDeaths.Average();
-            DeathRate = averageDeaths / Population * PeriodsInYear;
-            StatisticalStandardDeviation = Math.Sqrt(DeathRate * (1 - DeathRate) * Population);
+            double deathRateInPeriod = averageDeaths / Population;
+            DeathRate = deathRateInPeriod * PeriodsInYear;
+            StatisticalStandardDeviation = Math.Sqrt(deathRateInPeriod * (1 - deathRateInPeriod) * Population);
             double[] standardizedDeathsInRegression = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) > MinYearRegression && ToYear(r.Field<object>(TimeField)) < MaxYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
             StandardDeviation = Math.Sqrt(standardizedDeathsInRegression.Average(z => z * z) - Math.Pow(standardizedDeathsInRegression.Average(), 2));
             for (int i = 0; i < frequencies.Length; i++)
