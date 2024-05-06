@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MortalityAnalyzer.Common
 {
-    internal class Regression
+    public class Regression
     {
         double _Rsquared = 0, _Yintercept, _Slope;
         virtual public void Calculate(IList<double> xVals, IList<double> yVals)
@@ -18,5 +18,17 @@ namespace MortalityAnalyzer.Common
         {
             return _Yintercept + _Slope * x;
         }
+    }
+
+    public class LogRegression : Regression
+    {
+        public override void Calculate(IList<double> xVals, IList<double> yVals)
+        {
+            for (int i = 0; i < yVals.Count; i++)
+                yVals[i] = Math.Log(yVals[i]);
+            base.Calculate(xVals, yVals);
+        }
+
+        public override double Y(double x) => Math.Exp(base.Y(x));
     }
 }
