@@ -21,15 +21,15 @@ namespace MortalityAnalyzer.Common
                 xVals.Add(year);
                 yVals.Add(Convert.ToDouble(dataRow[1]));
             }
-            double rsquared, yintercept, slope;
-            LinearRegression(xVals, yVals, 0, xVals.Count, out rsquared, out yintercept, out slope);
+            Regression regression = new Regression();
+            regression.Calculate(xVals, yVals);
             double[] deltas = new double[yearFractions];
             double[] counts = new double[yearFractions];
             foreach (DataRow dataRow in dataTable.Rows)
             {
                 double year = TimeToDouble(dataRow[0]);
                 int yearFraction = GetYearFraction(dataRow[0], yearFractions);
-                double baseLine = yintercept + slope * year;
+                double baseLine = regression.Y(year);
                 deltas[yearFraction] += Convert.ToDouble(dataRow[1]) - baseLine;
                 counts[yearFraction]++;
             }
@@ -44,7 +44,7 @@ namespace MortalityAnalyzer.Common
             {
                 double year = TimeToDouble(dataRow[0]);
                 int yearFraction = GetYearFraction(dataRow[0], yearFractions);
-                double baseLine = yintercept + slope * year + deltas[yearFraction] - averageDelta;
+                double baseLine = regression.Y(year) + deltas[yearFraction] - averageDelta;
                 dataRow["BaseLine"] = baseLine;
                 double excess = Convert.ToDouble(dataRow[1]) - baseLine;
                 dataRow["Excess"] = excess;
