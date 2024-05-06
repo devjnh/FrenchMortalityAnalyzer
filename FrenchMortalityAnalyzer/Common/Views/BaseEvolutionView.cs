@@ -132,5 +132,8 @@ namespace MortalityAnalyzer.Views
             workSheet.Cells[1, 7].Value = GenderModeText;
             workSheet.Cells[1, 9].Value = AgeRange;
         }
+        protected virtual void BuildAdditionalInfo(ExcelWorksheet workSheet)
+        {
+        }
     }
 }

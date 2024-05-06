@@ -23,6 +23,7 @@ namespace MortalityAnalyzer.Views
             int iLastEvolutionRow = workSheet.Dimension.End.Row;
             BuildEvolutionChart(workSheet, 0);
             BuildExcessHistogram(workSheet, 1);
+            BuildAdditionalInfo(workSheet);
             BuildExcessEvolutionChart(workSheet, 2, iLastEvolutionRow);
             if (MortalityEvolution.InjectionsDoses.Length == 0)
                 BuildExcessPercentEvolutionChart(workSheet, 3, iLastEvolutionRow);
@@ -171,7 +172,7 @@ namespace MortalityAnalyzer.Views
             DisplayField(workSheet, iRow++, "Excess rate/100000/year:", MortalityEvolution.ExcessRate * 100000, "0.00");
         }
 
-        private static void DisplayField(ExcelWorksheet workSheet, int iRow, string label, object value, string format = "0.0")
+        protected static void DisplayField(ExcelWorksheet workSheet, int iRow, string label, object value, string format = "0.0")
         {
             workSheet.Cells[iRow, _DataColumn + 1].Value = label;
             ExcelStyle varianceCellstyle = workSheet.Cells[iRow, _DataColumn + 1, iRow, _DataColumn + 3].Style;
