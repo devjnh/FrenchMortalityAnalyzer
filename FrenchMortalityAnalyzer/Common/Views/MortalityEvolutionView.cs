@@ -47,7 +47,7 @@ namespace MortalityAnalyzer.Views
                 _ => "",
             };
         }
-        const int _DataColumn = 15;
+        protected const int _DataColumn = 15;
         private void BuildEvolutionTable(ExcelWorksheet workSheet)
         {
             workSheet.Cells[3, _DataColumn + 1].LoadFromDataTable(MortalityEvolution.DataTable, true);
@@ -175,12 +175,7 @@ namespace MortalityAnalyzer.Views
         protected static void DisplayField(ExcelWorksheet workSheet, int iRow, string label, object value, string format = "0.0")
         {
             workSheet.Cells[iRow, _DataColumn + 1].Value = label;
-            ExcelStyle varianceCellstyle = workSheet.Cells[iRow, _DataColumn + 1, iRow, _DataColumn + 3].Style;
-            varianceCellstyle.Border.BorderAround(ExcelBorderStyle.Thin);
-            varianceCellstyle.Fill.PatternType = ExcelFillStyle.Solid;
-            varianceCellstyle.Fill.BackgroundColor.SetColor(Color.Gray);
-            varianceCellstyle.Font.Color.SetColor(Color.White);
-            varianceCellstyle.Font.Bold = true;
+            SetCellStyle(workSheet.Cells[iRow, _DataColumn + 1, iRow, _DataColumn + 3].Style);
             workSheet.Cells[iRow, _DataColumn + 4].Value = value;
             workSheet.Cells[iRow, _DataColumn + 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
             workSheet.Cells[iRow, _DataColumn + 4].Style.Numberformat.Format = format;

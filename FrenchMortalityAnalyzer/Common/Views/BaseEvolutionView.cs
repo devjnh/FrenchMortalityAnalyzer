@@ -1,8 +1,11 @@
 ﻿using MortalityAnalyzer.Model;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing.Chart;
+using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -134,6 +137,21 @@ namespace MortalityAnalyzer.Views
         }
         protected virtual void BuildAdditionalInfo(ExcelWorksheet workSheet)
         {
+        }
+        protected static void SetCellStyle(ExcelStyle cellstyle, bool isHeader = true)
+        {
+            cellstyle.Border.BorderAround(ExcelBorderStyle.Thin);
+            if (!isHeader)
+                return;
+            cellstyle.Fill.PatternType = ExcelFillStyle.Solid;
+            cellstyle.Fill.BackgroundColor.SetColor(Color.Gray);
+            cellstyle.Font.Color.SetColor(Color.White);
+            cellstyle.Font.Bold = true;
+        }
+        static protected void DisplayInfo(ExcelWorksheet workSheet, int dataColumn, int iRow, string label, bool isHeader = true)
+        {
+            workSheet.Cells[iRow, dataColumn + 1].Value = label;
+            SetCellStyle(workSheet.Cells[iRow, dataColumn + 1, iRow, dataColumn + 3].Style, isHeader);
         }
     }
 }
