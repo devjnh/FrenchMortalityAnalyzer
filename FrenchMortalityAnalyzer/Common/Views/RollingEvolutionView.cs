@@ -42,8 +42,9 @@ namespace MortalityAnalyzer.Views
             ExcelWorksheet workSheet = CreateSheet(package);
             BuildHeader(workSheet);
             BuildEvolutionTable(workSheet);
+            int iEndData = workSheet.Dimension.End.Row;
             BuildAdditionalInfo(workSheet);
-            BuildEvolutionChart(workSheet, _iStartData + 1, workSheet.Dimension.End.Row);
+            BuildEvolutionChart(workSheet, _iStartData + 1, iEndData);
             if (MortalityEvolution.InjectionsDoses.Length == 0)
                 BuildExcessEvolutionChart(workSheet, 0, VaxDose.None);
             else
