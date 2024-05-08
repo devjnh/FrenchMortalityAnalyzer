@@ -18,5 +18,7 @@ namespace MortalityAnalyzer
             mortalityEvolution.OutputFile = OutputFile;
             mortalityEvolution.Show = Show;
         }
+        virtual public string ActualOutputFile => OutputFile;
+
     }
 }
