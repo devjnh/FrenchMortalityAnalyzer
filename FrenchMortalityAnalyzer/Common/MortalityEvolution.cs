@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MortalityAnalyzer
 {
-    public abstract class MortalityEvolution : MortalityEvolutionBase
+    public abstract class MortalityEvolution : MortalityTimeEvolution
     {
         public DateTime LastDay { get; private set; } = DateTime.MaxValue;
         internal DatabaseEngine DatabaseEngine { get; set; }

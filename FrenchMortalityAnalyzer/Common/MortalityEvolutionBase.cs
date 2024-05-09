@@ -18,8 +18,6 @@ namespace MortalityAnalyzer
         public int MinAge { get; set; } = -1;
         [Option("MaxAge", Required = false, HelpText = "Max age included in the analysis. No uper age limit by default")]
         public int MaxAge { get; set; } = -1;
-        [Option('m', "TimeMode", Required = false, HelpText = "Time mode: Year/DeltaYear/Semester/Quarter/Week/Day. Year by default")]
-        public TimeMode TimeMode { get; set; } = TimeMode.Year;
         [Option('g', "Gender", Required = false, HelpText = "Gender mode: All/Male/Female. All by default")]
         public GenderFilter GenderMode { get; set; } = GenderFilter.All;
         [Option('r', "Raw", Required = false, HelpText = "Display raw deaths in the chart. Not available for the Week/Day time mpde")]
@@ -34,8 +32,6 @@ namespace MortalityAnalyzer
 
 
         #region RollingEvolution
-        [Option("RollingPeriod", Required = false, HelpText = "Number of periods to calculate the rolling average. 8 by default (with TimeMode Week or Day only)")]
-        public int RollingPeriod { get; set; } = 8;
         [Option("ZoomMinDate", Required = false, HelpText = "Time zoom min date 2020-01-01 by default (with TimeMode Week or Day only)")]
         public DateTime ZoomMinDate { get; set; } = new DateTime(2020, 1, 1);
         [Option("ZoomMaxDate", Required = false, HelpText = "Time zoom max date 2022-07-01 by default (with TimeMode Week or Day only)")]
@@ -49,15 +45,27 @@ namespace MortalityAnalyzer
             mortalityEvolution.MaxYearRegression = MaxYearRegression;
             mortalityEvolution.MinAge = MinAge;
             mortalityEvolution.MaxAge = MaxAge;
-            mortalityEvolution.TimeMode = TimeMode;
             mortalityEvolution.GenderMode = GenderMode;
             mortalityEvolution.DisplayRawDeaths = DisplayRawDeaths;
             mortalityEvolution.ToDateDelay = ToDateDelay;
             mortalityEvolution.DisplayInjections = DisplayInjections;
-            mortalityEvolution.RollingPeriod = RollingPeriod;
             mortalityEvolution.ZoomMinDate = ZoomMinDate;
             mortalityEvolution.ZoomMaxDate = ZoomMaxDate;
             mortalityEvolution.ExcessSince = ExcessSince;
+        }
+    }
+
+    public class MortalityTimeEvolution : MortalityEvolutionBase
+    {
+        [Option('m', "TimeMode", Required = false, HelpText = "Time mode: Year/DeltaYear/Semester/Quarter/Week/Day. Year by default")]
+        public TimeMode TimeMode { get; set; } = TimeMode.Year;
+        [Option("RollingPeriod", Required = false, HelpText = "Number of periods to calculate the rolling average. 8 by default (with TimeMode Week or Day only)")]
+        public int RollingPeriod { get; set; } = 8;
+        void CopyTo(MortalityTimeEvolution mortalityEvolution)
+        {
+            CopyTo((MortalityEvolutionBase)mortalityEvolution);
+            mortalityEvolution.TimeMode = TimeMode;
+            mortalityEvolution.RollingPeriod = RollingPeriod;
         }
     }
 }
