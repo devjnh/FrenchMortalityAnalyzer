@@ -46,25 +46,25 @@ namespace MortalityAnalyzer.Views
             BuildAdditionalInfo(workSheet);
             BuildEvolutionChart(workSheet, _iStartData + 1, iEndData);
             if (MortalityEvolution.InjectionsDoses.Length == 0)
-                BuildExcessEvolutionChart(workSheet, 0, VaxDose.None);
+                BuildExcessEvolutionChart(workSheet, 0, VaxDose.None, iEndData);
             else
                 for (int j = 0; j < MortalityEvolution.InjectionsDoses.Length; j++)
-                    BuildExcessEvolutionChart(workSheet, j, MortalityEvolution.InjectionsDoses[j]);
+                    BuildExcessEvolutionChart(workSheet, j, MortalityEvolution.InjectionsDoses[j], iEndData);
         }
 
-        private void BuildExcessEvolutionChart(ExcelWorksheet workSheet, int j, VaxDose vaxDose)
+        private void BuildExcessEvolutionChart(ExcelWorksheet workSheet, int j, VaxDose vaxDose, int iEndData)
         {
-            BuildExcessEvolutionChart(workSheet, _iStartData + 1, workSheet.Dimension.End.Row, _DataColumn + 5 + j, vaxDose, 30 + j * 60);
+            BuildExcessEvolutionChart(workSheet, _iStartData + 1, iEndData, _DataColumn + 5 + j, vaxDose, 30 + j * 60);
             DateTime minZoomDate = RollingEvolution.ZoomMinDate;
             DateTime maxZoomDate = RollingEvolution.ZoomMaxDate;
             int iZoomMin = _iStartData + 1;
-            int iZoomMax = workSheet.Dimension.End.Row;
+            int iZoomMax = iEndData;
             for (int i = 0; i < MortalityEvolution.DataTable.Rows.Count; i++)
             {
                 DateTime date = (DateTime)MortalityEvolution.DataTable.Rows[i][0];
                 if (iZoomMin == _iStartData + 1 && date >= minZoomDate)
                     iZoomMin = _iStartData + 1 + i;
-                if (iZoomMax == workSheet.Dimension.End.Row && date >= maxZoomDate)
+                if (iZoomMax == iEndData && date >= maxZoomDate)
                     iZoomMax = _iStartData + 1 + i;
             }
             BuildExcessEvolutionChart(workSheet, iZoomMin, iZoomMax, _DataColumn + 5 + j, vaxDose, 60 + j * 60);
