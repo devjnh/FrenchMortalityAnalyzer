@@ -18,7 +18,7 @@ namespace MortalityAnalyzer
     {
     }
     [Verb("evolution", HelpText = "French mortality evolution by years/semesters")]
-    public class MortalityEvolutionOptions : MortalityEvolutionBase
+    public class MortalityEvolutionOptions : MortalityTimeEvolution
     {
         public MortalityEvolution GetEvolutionEngine()
         {
