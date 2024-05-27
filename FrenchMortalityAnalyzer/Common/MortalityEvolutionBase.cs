@@ -61,7 +61,7 @@ namespace MortalityAnalyzer
         public TimeMode TimeMode { get; set; } = TimeMode.Year;
         [Option("RollingPeriod", Required = false, HelpText = "Number of periods to calculate the rolling average. 8 by default (with TimeMode Week or Day only)")]
         public int RollingPeriod { get; set; } = 8;
-        void CopyTo(MortalityTimeEvolution mortalityEvolution)
+        public void CopyTo(MortalityTimeEvolution mortalityEvolution)
         {
             CopyTo((MortalityEvolutionBase)mortalityEvolution);
             mortalityEvolution.TimeMode = TimeMode;
