@@ -21,7 +21,7 @@ namespace MortalityAnalyzer.Common
                 xVals.Add(year);
                 yVals.Add(Convert.ToDouble(dataRow[1]));
             }
-            Regression regression = new LogRegression();
+            Regression regression = yVals.Contains(0) ? new Regression() : new LogRegression();
             regression.Calculate(xVals, yVals);
             double[] deltas = new double[yearFractions];
             double[] counts = new double[yearFractions];
