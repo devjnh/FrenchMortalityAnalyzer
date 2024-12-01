@@ -16,14 +16,40 @@ class Program
     static int Main(string[] args)
     {
         if (args.Length == 0)
-            return MortalityEvolution(new MortalityEvolutionOptions());
+            return FullMortalityEvolution(new FullMortalityEvolutionOptions { Show = true});
 
-        return Parser.Default.ParseArguments<MortalityEvolutionOptions, VaccinationEvolutionOptions, InitOptions, ShowOptions>(args)
+        return Parser.Default.ParseArguments<MortalityEvolutionOptions, FullMortalityEvolutionOptions, VaccinationEvolutionOptions, InitOptions, ShowOptions>(args)
             .MapResult(
               (MortalityEvolutionOptions opts) => MortalityEvolution(opts),
+              (FullMortalityEvolutionOptions opts) => FullMortalityEvolution(opts),
               (InitOptions opts) => Init(opts),
               (ShowOptions opts) => Show(opts),
               errs => 1);
+    }
+    static int FullMortalityEvolution(FullMortalityEvolutionOptions mortalityEvolutionOptions)
+    {
+        Init(mortalityEvolutionOptions);
+        DatabaseEngine databaseEngine = GetDatabaseEngine(mortalityEvolutionOptions.Folder);
+        GenerateTimeMode(databaseEngine, mortalityEvolutionOptions, TimeMode.Year);
+        GenerateTimeMode(databaseEngine, mortalityEvolutionOptions, TimeMode.DeltaYear);
+        GenerateTimeMode(databaseEngine, mortalityEvolutionOptions, TimeMode.Semester);
+        GenerateTimeMode(databaseEngine, mortalityEvolutionOptions, TimeMode.Quarter);
+        GenerateTimeMode(databaseEngine, mortalityEvolutionOptions, TimeMode.Month);
+        GenerateTimeMode(databaseEngine, mortalityEvolutionOptions, TimeMode.Week, 8);
+        GenerateTimeMode(databaseEngine, mortalityEvolutionOptions, TimeMode.Week, 4);
+
+        if (mortalityEvolutionOptions.Show)
+            Show(mortalityEvolutionOptions);
+        return 0;
+    }
+    static void GenerateTimeMode(DatabaseEngine databaseEngine, FullMortalityEvolutionOptions mortalityEvolutionOptions, TimeMode timeMode, int rollingPeriod = 7)
+    {
+        MortalityEvolution engine = mortalityEvolutionOptions.GetEvolutionEngine(timeMode, rollingPeriod);
+        engine.DatabaseEngine = databaseEngine;
+        engine.Generate();
+        BaseEvolutionView mortalityEvolutionView = engine.TimeMode <= TimeMode.Month ? new MortalityEvolutionView() : new RollingEvolutionView();
+        mortalityEvolutionView.MortalityEvolution = engine;
+        mortalityEvolutionView.Save();
     }
     static int MortalityEvolution(MortalityEvolutionOptions mortalityEvolutionOptions)
     {
@@ -82,7 +108,7 @@ class Program
     }
     private static int Show(Options initOptions)
     {
-        string filePath = Path.Combine(initOptions.Folder, initOptions.OutputFile);
+        string filePath = Path.Combine(initOptions.Folder, initOptions.ActualOutputFile);
         if (File.Exists(filePath))
             Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
         else

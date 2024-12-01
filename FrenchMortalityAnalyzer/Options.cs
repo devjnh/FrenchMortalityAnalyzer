@@ -34,6 +34,36 @@ namespace MortalityAnalyzer
             return IsNormalMode ? new MortalityEvolutionView() : new RollingEvolutionView();
         }
     }
+    [Verb("fullevolution", HelpText = "French mortality evolution for all time units")]
+    public class FullMortalityEvolutionOptions : MortalityEvolutionBase
+    {
+        public MortalityEvolution GetEvolutionEngine(TimeMode timeMode, int rollingPeriod)
+        {
+            MortalityEvolution mortalityEvolution = timeMode <= TimeMode.Month ? new FrenchMortalityEvolution() : new FrenchRollingEvolution();
+            CopyTo(mortalityEvolution);
+            mortalityEvolution.OutputFile = ActualOutputFile;
+            mortalityEvolution.TimeMode = timeMode;
+            mortalityEvolution.RollingPeriod = rollingPeriod;
+            return mortalityEvolution;
+        }
+
+        override public string ActualOutputFile
+        {
+            get
+            {
+                string baseFileName = Path.GetFileNameWithoutExtension(OutputFile);
+                if (MinAge < 0 && MaxAge < 0)
+                    return $"{baseFileName}.xlsx";
+                else if (MaxAge < 0)
+                    return $"{baseFileName} {MinAge}+.xlsx";
+                else if (MinAge < 0)
+                    return $"{baseFileName} {MaxAge}-.xlsx";
+                else
+                    return $"{baseFileName} {MinAge}-{MaxAge}.xlsx";
+            }
+        }
+
+    }
     [Verb("vaxevolution", HelpText = "Mortality and Covid vaccine injections evolution by sliding weeks")]
     public class VaccinationEvolutionOptions : FrenchRollingEvolution
     {
