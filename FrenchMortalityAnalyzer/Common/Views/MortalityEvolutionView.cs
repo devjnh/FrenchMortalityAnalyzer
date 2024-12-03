@@ -31,7 +31,7 @@ namespace MortalityAnalyzer.Views
                 for (int i = 0; i < MortalityEvolution.InjectionsDoses.Length; i++)
                 {
                     VaxDose vaxDose = MortalityEvolution.InjectionsDoses[i];
-                    BuildExcessPercentEvolutionChart(workSheet, 3 + i, iLastEvolutionRow, vaxDose, _DataColumn + 7 + i);
+                    BuildExcessPercentEvolutionChart(workSheet, 3 + i, iLastEvolutionRow, vaxDose, _DataColumn + 8 + i);
                 }
         }
 
@@ -71,6 +71,8 @@ namespace MortalityAnalyzer.Views
                 workSheet.Cells[3, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 1].Style.Numberformat.Format = yearFormat;
             workSheet.Cells[3, _DataColumn + 6].Value = "Excess %";
             workSheet.Cells[3, _DataColumn + 6, workSheet.Dimension.End.Row, _DataColumn + 6].Style.Numberformat.Format = "0.0%";
+            workSheet.Cells[3, _DataColumn + 7].Value = "Z Score";
+            workSheet.Cells[3, _DataColumn + 7, workSheet.Dimension.End.Row, _DataColumn + 7].Style.Numberformat.Format = "0.00";
             range.AutoFitColumns();
         }
         const int _ChartsColumn = 0;

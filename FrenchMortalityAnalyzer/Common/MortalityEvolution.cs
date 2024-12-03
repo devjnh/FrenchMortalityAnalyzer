@@ -45,6 +45,7 @@ namespace MortalityAnalyzer
             CleanDataTable();
             Projection.BuildProjection(DataTable, MinYearRegression, MaxYearRegression, PeriodsInYear);
             BuildExcessHistogram();
+            CalculateZScore();
             if (DisplayInjections)
                 BuildVaccinationStatistics();
             MinMax();
@@ -54,6 +55,12 @@ namespace MortalityAnalyzer
             ExcessPerYear = TotalExcess / periodLength;
             ExcessRate = dataRows.Select(r => r.Field<double>("Excess")).Average() / Population * PeriodsInYear;
             RelativeExcess = TotalExcess / dataRows.Select(r => r.Field<double>("Standardized")).Sum();
+        }
+        void CalculateZScore()
+        {
+            DataTable.Columns.Add("ZScore", typeof(double));
+            foreach (DataRow dataRow in DataTable.Rows)
+                dataRow["ZScore"] = (double)dataRow["Excess"] / StandardDeviation;
         }
 
         private DataTable GetDataTable(string query)
