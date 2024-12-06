@@ -25,13 +25,14 @@ namespace MortalityAnalyzer.Views
             BuildExcessHistogram(workSheet, 1);
             BuildAdditionalInfo(workSheet);
             BuildExcessEvolutionChart(workSheet, 2, iLastEvolutionRow);
+            BuildZScoreEvolutionChart(workSheet, 3, iLastEvolutionRow);
             if (MortalityEvolution.InjectionsDoses.Length == 0)
-                BuildExcessPercentEvolutionChart(workSheet, 3, iLastEvolutionRow);
+                BuildExcessPercentEvolutionChart(workSheet, 4, iLastEvolutionRow);
             else
                 for (int i = 0; i < MortalityEvolution.InjectionsDoses.Length; i++)
                 {
                     VaxDose vaxDose = MortalityEvolution.InjectionsDoses[i];
-                    BuildExcessPercentEvolutionChart(workSheet, 3 + i, iLastEvolutionRow, vaxDose, _DataColumn + 8 + i);
+                    BuildExcessPercentEvolutionChart(workSheet, 4 + i, iLastEvolutionRow, vaxDose, _DataColumn + 8 + i);
                 }
         }
 
@@ -71,7 +72,7 @@ namespace MortalityAnalyzer.Views
                 workSheet.Cells[3, _DataColumn + 1, workSheet.Dimension.End.Row, _DataColumn + 1].Style.Numberformat.Format = yearFormat;
             workSheet.Cells[3, _DataColumn + 6].Value = "Excess %";
             workSheet.Cells[3, _DataColumn + 6, workSheet.Dimension.End.Row, _DataColumn + 6].Style.Numberformat.Format = "0.0%";
-            workSheet.Cells[3, _DataColumn + 7].Value = "Z Score";
+            workSheet.Cells[3, _DataColumn + 7].Value = "Z-Score";
             workSheet.Cells[3, _DataColumn + 7, workSheet.Dimension.End.Row, _DataColumn + 7].Style.Numberformat.Format = "0.00";
             range.AutoFitColumns();
         }
@@ -102,14 +103,23 @@ namespace MortalityAnalyzer.Views
         }
         private void BuildExcessEvolutionChart(ExcelWorksheet workSheet, int iChart, int iLastRow, VaxDose vaxDose = VaxDose.None, int injectionsColumn = 0)
         {
-            ExcelChart evolutionChart = workSheet.Drawings.AddChart("ExcessEvolutionChart", eChartType.ColumnClustered);
+            BuildEvolutionChart(workSheet, iChart, iLastRow, vaxDose, injectionsColumn, "Excess mortality", "Excess deaths", 5, "ExcessEvolutionChart");
+        }
+        private void BuildZScoreEvolutionChart(ExcelWorksheet workSheet, int iChart, int iLastRow, VaxDose vaxDose = VaxDose.None, int injectionsColumn = 0)
+        {
+            BuildEvolutionChart(workSheet, iChart, iLastRow, vaxDose, injectionsColumn, "Mortality Z-Score", "Deaths Z-Score", 7, "ZFactorEvolutionChart");
+        }
+
+        private void BuildEvolutionChart(ExcelWorksheet workSheet, int iChart, int iLastRow, VaxDose vaxDose, int injectionsColumn, string title, string serieName, int iSerieColumn, string chartName)
+        {
+            ExcelChart evolutionChart = workSheet.Drawings.AddChart(chartName, eChartType.ColumnClustered);
             SetBarGap(evolutionChart);
-            var standardizedDeathsSerie = evolutionChart.Series.Add(workSheet.Cells[_StartDataRow, _DataColumn + 5, iLastRow, _DataColumn + 5], workSheet.Cells[_StartDataRow, _DataColumn + 1, iLastRow, _DataColumn + 1]);
-            standardizedDeathsSerie.Header = "Excess deaths";
+            var dataSerie = evolutionChart.Series.Add(workSheet.Cells[_StartDataRow, _DataColumn + iSerieColumn, iLastRow, _DataColumn + iSerieColumn], workSheet.Cells[_StartDataRow, _DataColumn + 1, iLastRow, _DataColumn + 1]);
+            dataSerie.Header = serieName;
             AddInjectionsSerie(workSheet, evolutionChart, _StartDataRow, iLastRow, injectionsColumn, vaxDose);
             evolutionChart.SetPosition(_ChartsRow + iChart * _ChartsRowSpan, 0, _ChartsColumn, _ChartsOffset);
             evolutionChart.SetSize(900, 500);
-            evolutionChart.Title.Text = JoinTitle($"Excess mortality by {TimeModeText.ToLower()}", CountryName, GenderModeText, AgeRange, vaxDose == VaxDose.None ? "" : InjectionsTitleText);
+            evolutionChart.Title.Text = JoinTitle($"{title} by {TimeModeText.ToLower()}", CountryName, GenderModeText, AgeRange, vaxDose == VaxDose.None ? "" : InjectionsTitleText);
         }
 
         private void SetBarGap(ExcelChart evolutionChart)
