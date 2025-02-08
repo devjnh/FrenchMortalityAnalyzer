@@ -307,8 +307,8 @@ ORDER BY {3}";
             double deathRateInPeriod = averageDeaths / Population;
             DeathRate = deathRateInPeriod * PeriodsInYear;
             StatisticalStandardDeviation = Math.Sqrt(deathRateInPeriod * (1 - deathRateInPeriod) * Population);
-            double[] standardizedDeathsInRegression = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) > MinYearRegression && ToYear(r.Field<object>(TimeField)) < MaxYearRegression).Select(r => r.Field<double>("Standardized")).ToArray();
-            StandardDeviation = Math.Sqrt(standardizedDeathsInRegression.Average(z => z * z) - Math.Pow(standardizedDeathsInRegression.Average(), 2));
+            double[] excessDeathsInRegression = DataTable.AsEnumerable().Where(r => ToYear(r.Field<object>(TimeField)) > MinYearRegression && ToYear(r.Field<object>(TimeField)) < MaxYearRegression).Select(r => r.Field<double>("Excess")).ToArray();
+            StandardDeviation = Math.Sqrt(excessDeathsInRegression.Average(z => z * z) - Math.Pow(excessDeathsInRegression.Average(), 2));
             for (int i = 0; i < frequencies.Length; i++)
             {
                 DataRow dataRow = ExcessHistogram.NewRow();
