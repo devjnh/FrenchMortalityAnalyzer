@@ -34,4 +34,11 @@ Runtime data goes into `./Data` under the current working directory (`--folder` 
 
 **Views** (`Common/Views/`) write one worksheet per run, plus charts, into the output xlsx using EPPlus 6 (license context `NonCommercial`, set in `BaseEvolutionView`'s static constructor). The sheet name is built from the country, time mode, age range, gender and injections.
 
-**External URLs** are hard-coded: the death log list is scraped by regex from the data.gouv.fr dataset page (`LogFileDownloader`), the age-structure xlsx URLs are listed in `AgeStructureDownloader`, and the vaccination CSV URL is in `FrenchCovidVaxData`. When the upstream sources change, update these (see recent commits).
+**Age structure**: comes from a single INSEE file, `3_Pop1janv_age.xlsx` (from the "Bilan démographique" tables). It has one sheet per year, and `AgeStructureLoader` reads the years from 2000 until a sheet is missing. It uses columns C–E (metropolitan France: total, men, women), which matches the deaths excluding overseas departments. The table is cached in the DB and only re-extracted when a new file is downloaded; re-extraction then triggers a `DeathStatistics` rebuild. INSEE publishes a new edition every January under a new page id, so the URL in `AgeStructureDownloader` has to be updated yearly. Because files are skipped when one with the same name already exists locally, the old file must be removed from `Data/AgeStructure` for the new one to download.
+
+**External URLs** are hard-coded:
+- The death log list comes from the data.gouv.fr API (`https://www.data.gouv.fr/api/1/datasets/fichier-des-personnes-decedees/`, in `LogFileDownloader`), and the URLs are extracted with a regex. The HTML dataset page is not usable: it only embeds recent resources, and their URLs are JSON-escaped.
+- The age-structure URL is in `AgeStructureDownloader`.
+- The vaccination CSV URL is in `FrenchCovidVaxData`.
+
+When the upstream sources change, update these (see recent commits).
