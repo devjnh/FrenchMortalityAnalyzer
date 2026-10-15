@@ -87,11 +87,11 @@ class Program
 
         using (DatabaseEngine databaseEngine = GetDatabaseEngine(initOptions.Folder))
         {
-            Init(initOptions.Folder, databaseEngine);
+            Init(initOptions.Folder, databaseEngine, ageStructureDownloader.FilesDownloaded);
         }
         return 0;
     }
-    private static void Init(string dataFolder, DatabaseEngine databaseEngine)
+    private static void Init(string dataFolder, DatabaseEngine databaseEngine, bool newAgeStructureFiles)
     {
         FrenchCovidVaxData owidCovidVaxData = new FrenchCovidVaxData { DatabaseEngine = databaseEngine };
         if (!owidCovidVaxData.IsBuilt)
@@ -101,9 +101,9 @@ class Program
         deathLogs.Extract(dataFolder);
 
         AgeStructureLoader ageStructureLoader = new AgeStructureLoader { DatabaseEngine = databaseEngine };
-        ageStructureLoader.Load(dataFolder);
+        ageStructureLoader.Load(dataFolder, newAgeStructureFiles);
         DeathStatistics deathStatistics = new DeathStatistics { DatabaseEngine = databaseEngine, AgeStructure = ageStructureLoader.AgeStructure };
-        if (deathLogs.FilesInserted || !deathStatistics.IsBuilt)
+        if (deathLogs.FilesInserted || ageStructureLoader.Extracted || !deathStatistics.IsBuilt)
             deathStatistics.BuildStatistics();
     }
     private static int Show(Options initOptions)

@@ -17,13 +17,10 @@ namespace MortalityAnalyzer
         }
         string[] _Urls = new string[]
         {
-            "https://www.insee.fr/fr/statistiques/fichier/6327222/fm_t6.xlsx",
-            "https://www.insee.fr/fr/statistiques/fichier/7746192/Pyra2024.xlsx",
-            "https://www.insee.fr/fr/statistiques/fichier/7746192/Pyra2023.xlsx",
-            "https://www.insee.fr/fr/statistiques/fichier/7746192/Pyra2022.xlsx",
-            "https://www.insee.fr/fr/statistiques/fichier/7746192/Pyra2021.xlsx",
-            "https://www.insee.fr/fr/statistiques/fichier/6688661/Pyra2020.xlsx",
+            // Bilan démographique 2025: population at January 1st by gender and age, one sheet per year
+            "https://www.insee.fr/fr/statistiques/fichier/8721185/" + AgeStructureLoader.PopulationByAgeFile,
         };
+        public bool FilesDownloaded { get; private set; }
         public void DownloadMissingFiles()
         {
             if (!Directory.Exists(DataFolder))
@@ -41,6 +38,7 @@ namespace MortalityAnalyzer
                     wc.DownloadFile(url, filePath);
                 }
                 Console.WriteLine("- Done");
+                FilesDownloaded = true;
             }
         }
     }

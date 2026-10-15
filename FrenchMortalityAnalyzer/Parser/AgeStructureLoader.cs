@@ -23,48 +23,39 @@ namespace MortalityAnalyzer
         }
         public AgeStructure AgeStructure { get; private set; }
 
-        public void Load(string baseFolder)
+        public const string PopulationByAgeFile = "3_Pop1janv_age.xlsx";
+        public bool Extracted { get; private set; }
+
+        public void Load(string baseFolder, bool forceExtract = false)
         {
             AgeStructure = new AgeStructure(DatabaseEngine, MaxAge);
             try
             {
                 AgeStructure.LoadAgeStructure();
-                return;
+                if (!forceExtract)
+                    return;
             }
             catch { }
             DataTable = AgeStructure.DataTable;
+            DataTable.Clear();
             Extract(baseFolder);
+            Extracted = true;
         }
 
         private void Extract(string baseFolder)
         {
             Console.WriteLine($"Extracting age structure");
-            int minYear = DateTime.Today.Year;
-            foreach (string file in Directory.EnumerateFiles(Path.Combine(baseFolder, "AgeStructure"), "Pyra????.xlsx"))
-            {
-                int year = int.Parse(Path.GetFileNameWithoutExtension(file).Substring(4));
-                if (minYear > year)
-                    minYear = year;
-                using (var package = new ExcelPackage(new FileInfo(file)))
-                    ExtractYearAgeStructure(year, package.Workbook.Worksheets[1], 5, 3, 4);
-            }
-            using (var package = new ExcelPackage(new FileInfo(Path.Combine(baseFolder, @"AgeStructure\fm_t6.xlsx"))))
-                for (int year = 2000; year < minYear; year++)
-                {
-                    ExcelWorksheet yearSheet = package.Workbook.Worksheets[year.ToString()];
-                    if (yearSheet.Dimension.End.Column == 5)
-                        ExtractYearAgeStructure(year, yearSheet);
-                    else if (yearSheet.Dimension.End.Column >= 13)
-                        ExtractYearAgeStructure(year, yearSheet, 3, 4, 9);
-                    else
-                        throw new Exception("Unsuported age strucure worksheet");
-                }
+            // One worksheet per year. Columns C, D, E: metropolitan France (deaths in overseas departments are excluded from the statistics)
+            using (var package = new ExcelPackage(new FileInfo(Path.Combine(baseFolder, "AgeStructure", PopulationByAgeFile))))
+                for (int year = MinYear; package.Workbook.Worksheets[year.ToString()] != null; year++)
+                    ExtractYearAgeStructure(year, package.Workbook.Worksheets[year.ToString()]);
 
             DatabaseEngine.InsertTable(DataTable);
             Console.WriteLine($"Age structure inserted");
         }
 
         public int MaxAge { get { return 105; } }
+        public int MinYear { get { return 2000; } }
 
         private void ExtractYearAgeStructure(int year, ExcelWorksheet yearSheet, int totalColumn = 3, int malesColumn = 4, int femalesColumn = 5)
         {
