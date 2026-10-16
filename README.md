@@ -29,11 +29,18 @@ The first execution takes a while, because it downloads all the data, inserts it
 
 At every following execution, the program first downloads and inserts the death logs published since the last run, and the statistics are updated. It then generates an Excel spreadsheet named *FrenchMortality.xlsx* according to the options given on the command line. Each command adds or replaces one worksheet in the spreadsheet.
 
-The example batch file generates the French mortality by year for all ages, then the mortality by semester for the ages from 5 to 40, and finally displays the spreadsheet:
+The example batch file *FrenchMortality.bat* first generates the French mortality for all ages, by year, semester, quarter and day. It then does the same by semester, quarter and week for the ages from 5 to 40, and finally displays the spreadsheet:
 
-    .\Bin\FrenchMortalityAnalyzer.exe evolution
-    .\Bin\FrenchMortalityAnalyzer.exe evolution --MinAge 5 --MaxAge 40 --TimeMode Semester
-    .\Bin\FrenchMortalityAnalyzer.exe show
+    FrenchMortalityAnalyzer.exe evolution
+    FrenchMortalityAnalyzer.exe evolution --TimeMode Semester
+    FrenchMortalityAnalyzer.exe evolution --TimeMode Quarter
+    FrenchMortalityAnalyzer.exe evolution --TimeMode Day --RollingPeriod 7
+    FrenchMortalityAnalyzer.exe evolution --MinAge 5 --MaxAge 40 --TimeMode Semester
+    FrenchMortalityAnalyzer.exe evolution --MinAge 5 --MaxAge 40 --TimeMode Quarter
+    FrenchMortalityAnalyzer.exe evolution --MinAge 5 --MaxAge 40 --TimeMode Week --RollingPeriod 4
+    FrenchMortalityAnalyzer.exe show
+
+The second example, *FrenchMortality 12-40.bat*, generates the mortality of the ages from 12 to 40 together with the Covid 19 vaccine injections, in a separate spreadsheet.
 
 Launched without arguments, the executable generates the mortality evolution for all the time modes and displays the spreadsheet (the same as `fullevolution --Show`).
 
@@ -86,7 +93,12 @@ The project targets both the .NET Framework 4.7.2 and .NET 6:
 
 ## How to distribute the executable
 
-For Windows computers, copy the executable *FrenchMortalityAnalyzer.exe* along with all the dll files from the *net472* output folder.
+For Windows computers, run *Scripts\Build.bat*. It needs the .NET SDK, and it does the following:
+
+- Builds the release version.
+- Packages it in *Release\FrenchMortality.zip*. The archive has *FrenchMortalityAnalyzer.exe* and its config file at the root, the dll files in the *Bin* subfolder, and the example batch files from *Scripts\Package*.
+
+To change the example batch files that are distributed, edit them in *Scripts\Package*.
 
 For Linux or macOS you can try the .NET 6 version of the executable, but it has not been tested yet.
 
